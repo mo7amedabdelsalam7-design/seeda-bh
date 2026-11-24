@@ -17,6 +17,7 @@ from google_auth import get_current_user, get_db, is_pg, setup_google_auth
 BASE_DIR = Path(__file__).resolve().parent
 os.chdir(BASE_DIR)
 STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
 MICROLESS_IMAGES_DIR = STATIC_DIR / "images" / "microless"
 MICROLESS_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -560,6 +561,30 @@ def api_history(sku: str):
     return {"product": prod_dict, "history": hist}
 
 
+@app.get("/api/wishlist")
+def api_wishlist_list(request: Request):
+    user = get_current_user(request)
+    if not user or not user.get("id"):
+        return JSONResponse(status_code=401, content={"ok": False, "error": "unauthorized", "items": []})
+
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            _sql(conn, "SELECT deal_key, title, price, url, created_at FROM saved_deals WHERE user_id = ? ORDER BY created_at DESC"),
+            (int(user["id"]),),
+        )
+        items = []
+        for raw_r in cur.fetchall():
+            r = _row_to_dict(raw_r)
+            r["url"] = apply_affiliate(str(r.get("url") or ""))
+            r["saved_ago"] = format_time_ago(r.get("created_at"))
+            items.append(r)
+        return {"ok": True, "count": len(items), "items": items}
+    finally:
+        conn.close()
+
+
 @app.post("/api/wishlist/toggle")
 async def api_wishlist_toggle(request: Request):
     user = get_current_user(request)
@@ -670,50 +695,55 @@ def render_layout(
             --bh-gold: #F59E0B;
             --bh-green: #10B981;
             --bh-cyan: #38BDF8;
-            --radius-xl: 22px;
-            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
             --radius-md: 12px;
-            --transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
         }}
 
         html[data-theme="dark"] {{
-            --bg-main: #090C12;
-            --bg-surface: #111622;
-            --bg-card: #161C2C;
-            --bg-card-hover: #1E273D;
-            --bg-input: #0C1018;
+            --bg-main: #070A10;
+            --bg-surface: #0F1522;
+            --bg-card: #151D2E;
+            --bg-card-hover: #1D2840;
+            --bg-input: #0A0E17;
             --border-color: rgba(255, 255, 255, 0.09);
-            --border-strong: rgba(255, 42, 68, 0.42);
+            --border-strong: rgba(255, 42, 68, 0.45);
             --text-primary: #F8FAFC;
             --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --shadow-card: 0 14px 34px rgba(0, 0, 0, 0.42);
-            --header-bg: rgba(13, 17, 27, 0.94);
+            --shadow-card: 0 16px 38px rgba(0, 0, 0, 0.46);
+            --header-bg: rgba(10, 14, 23, 0.88);
         }}
 
         html[data-theme="light"] {{
-            --bg-main: #F4F6FB;
+            --bg-main: #F3F6FB;
             --bg-surface: #FFFFFF;
             --bg-card: #FFFFFF;
-            --bg-card-hover: #FFF7F8;
-            --bg-input: #EEF2F8;
+            --bg-card-hover: #FFF6F7;
+            --bg-input: #EDF2F8;
             --border-color: rgba(15, 23, 42, 0.09);
-            --border-strong: rgba(206, 17, 38, 0.36);
+            --border-strong: rgba(206, 17, 38, 0.38);
             --text-primary: #0F172A;
             --text-secondary: #475569;
             --text-muted: #64748B;
-            --shadow-card: 0 12px 28px rgba(15, 23, 42, 0.08);
-            --header-bg: rgba(255, 255, 255, 0.95);
+            --shadow-card: 0 14px 32px rgba(15, 23, 42, 0.08);
+            --header-bg: rgba(255, 255, 255, 0.9);
         }}
 
         @keyframes pulseGlow {{
-            0%, 100% {{ transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.45); }}
-            50% {{ transform: scale(1.12); box-shadow: 0 0 0 6px rgba(255, 42, 68, 0); }}
+            0%, 100% {{ transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.5); }}
+            50% {{ transform: scale(1.16); box-shadow: 0 0 0 7px rgba(255, 42, 68, 0); }}
         }}
 
         @keyframes floatSoft {{
             0%, 100% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(-4px); }}
+            50% {{ transform: translateY(-5px); }}
+        }}
+
+        @keyframes fadeUp {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
         }}
 
         * {{
@@ -725,8 +755,9 @@ def render_layout(
 
         body {{
             background:
-                radial-gradient(circle at 12% 8%, rgba(255, 42, 68, 0.09), transparent 36%),
-                radial-gradient(circle at 88% 18%, rgba(56, 189, 248, 0.07), transparent 34%),
+                radial-gradient(circle at 10% 6%, rgba(255, 42, 68, 0.13), transparent 36%),
+                radial-gradient(circle at 90% 14%, rgba(56, 189, 248, 0.10), transparent 36%),
+                radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.06), transparent 40%),
                 var(--bg-main);
             color: var(--text-primary);
             min-height: 100vh;
@@ -742,7 +773,7 @@ def render_layout(
 
         .container {{
             width: 100%;
-            max-width: 1360px;
+            max-width: 1380px;
             margin: 0 auto;
             padding: 0 20px;
         }}
@@ -751,9 +782,10 @@ def render_layout(
             position: sticky;
             top: 0;
             z-index: 60;
-            backdrop-filter: blur(14px);
+            backdrop-filter: blur(18px);
             background: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
         }}
 
         .navbar-inner {{
@@ -761,7 +793,7 @@ def render_layout(
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            min-height: 70px;
+            min-height: 72px;
             flex-wrap: wrap;
             padding: 10px 0;
         }}
@@ -775,7 +807,7 @@ def render_layout(
         }}
 
         .brand-link:hover {{
-            transform: translateY(-1px) scale(1.015);
+            transform: translateY(-1px) scale(1.02);
         }}
 
         .brand-logo-img {{
@@ -789,7 +821,7 @@ def render_layout(
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 18px rgba(206, 17, 38, 0.35);
+            box-shadow: 0 8px 20px rgba(206, 17, 38, 0.38);
             border-radius: 14px;
         }}
 
@@ -800,7 +832,7 @@ def render_layout(
         }}
 
         .brand-title {{
-            font-size: 1.22rem;
+            font-size: 1.24rem;
             font-weight: 900;
             letter-spacing: -0.3px;
             display: flex;
@@ -809,7 +841,9 @@ def render_layout(
         }}
 
         .brand-title span {{
-            color: var(--bh-red-bright);
+            background: linear-gradient(135deg, #FF2A44, #FF7A45);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }}
 
         .brand-sub {{
@@ -821,7 +855,7 @@ def render_layout(
         .nav-search {{
             flex: 1;
             min-width: 220px;
-            max-width: 400px;
+            max-width: 410px;
             position: relative;
         }}
 
@@ -839,7 +873,7 @@ def render_layout(
 
         .nav-search input:focus {{
             border-color: var(--bh-red-bright);
-            box-shadow: 0 0 0 3px var(--bh-red-soft);
+            box-shadow: 0 0 0 4px var(--bh-red-soft);
             transform: translateY(-1px);
         }}
 
@@ -857,7 +891,7 @@ def render_layout(
         }}
 
         .nav-search button:hover {{
-            transform: translateY(-50%) scale(1.15);
+            transform: translateY(-50%) scale(1.18);
         }}
 
         .nav-links {{
@@ -869,7 +903,7 @@ def render_layout(
 
         .nav-link {{
             padding: 7px 13px;
-            border-radius: 11px;
+            border-radius: 12px;
             font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-secondary);
@@ -889,7 +923,7 @@ def render_layout(
         .nav-link.active {{
             color: #FFFFFF;
             background: linear-gradient(135deg, #CE1126, #FF2A44);
-            box-shadow: 0 6px 18px rgba(206, 17, 38, 0.35);
+            box-shadow: 0 8px 20px rgba(206, 17, 38, 0.38);
         }}
 
         .live-dot {{
@@ -911,7 +945,7 @@ def render_layout(
         .theme-btn {{
             width: 36px;
             height: 36px;
-            border-radius: 10px;
+            border-radius: 11px;
             border: 1px solid var(--border-color);
             background: var(--bg-card);
             color: var(--text-primary);
@@ -925,12 +959,12 @@ def render_layout(
 
         .theme-btn:hover {{
             border-color: var(--bh-red-bright);
-            transform: translateY(-2px) rotate(8deg);
+            transform: translateY(-2px) rotate(12deg);
         }}
 
         .btn-outline {{
             padding: 8px 14px;
-            border-radius: 11px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             background: var(--bg-card);
             color: var(--text-primary);
@@ -953,14 +987,14 @@ def render_layout(
 
         .btn-primary {{
             padding: 8px 15px;
-            border-radius: 11px;
+            border-radius: 12px;
             border: none;
             background: linear-gradient(135deg, #CE1126, #FF2A44);
             color: #FFFFFF;
             font-weight: 800;
             font-size: 0.84rem;
             cursor: pointer;
-            box-shadow: 0 7px 20px rgba(206, 17, 38, 0.34);
+            box-shadow: 0 8px 22px rgba(206, 17, 38, 0.36);
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
@@ -970,23 +1004,26 @@ def render_layout(
         }}
 
         .btn-primary:hover {{
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 11px 24px rgba(255, 42, 68, 0.44);
+            transform: translateY(-2px) scale(1.025);
+            box-shadow: 0 12px 26px rgba(255, 42, 68, 0.48);
         }}
 
         main {{
             flex: 1;
-            padding: 24px 0 64px;
+            padding: 24px 0 68px;
+            animation: fadeUp 0.38s ease;
         }}
 
         .hero-box {{
             position: relative;
             overflow: hidden;
-            border-radius: 26px;
-            background: linear-gradient(135deg, rgba(255, 42, 68, 0.16) 0%, var(--bg-surface) 48%, rgba(56, 189, 248, 0.08) 100%);
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at 85% 20%, rgba(255, 42, 68, 0.22), transparent 45%),
+                linear-gradient(135deg, rgba(255, 42, 68, 0.14) 0%, var(--bg-surface) 52%, rgba(56, 189, 248, 0.09) 100%);
             border: 1px solid var(--border-strong);
-            padding: 34px 32px;
-            margin-bottom: 36px;
+            padding: 36px 34px;
+            margin-bottom: 38px;
             box-shadow: var(--shadow-card);
             display: grid;
             grid-template-columns: 1.45fr 1fr;
@@ -996,7 +1033,8 @@ def render_layout(
         }}
 
         .hero-box:hover {{
-            box-shadow: 0 18px 42px rgba(206, 17, 38, 0.18);
+            box-shadow: 0 22px 48px rgba(206, 17, 38, 0.22);
+            transform: translateY(-2px);
         }}
 
         .hero-badge {{
@@ -1014,20 +1052,22 @@ def render_layout(
         }}
 
         .hero-title {{
-            font-size: 2.15rem;
+            font-size: 2.2rem;
             font-weight: 900;
             line-height: 1.25;
             margin-bottom: 12px;
         }}
 
         .hero-title span {{
-            color: var(--bh-red-bright);
+            background: linear-gradient(135deg, #FF2A44, #FF8A3D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }}
 
         .hero-desc {{
             color: var(--text-secondary);
             font-size: 0.98rem;
-            line-height: 1.7;
+            line-height: 1.75;
             margin-bottom: 22px;
             max-width: 620px;
         }}
@@ -1040,41 +1080,47 @@ def render_layout(
         }}
 
         .hero-stats {{
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            padding-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(110px, 1fr));
+            gap: 12px;
+            padding-top: 18px;
             border-top: 1px solid var(--border-color);
         }}
 
         .stat-item {{
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 12px 14px;
             transition: var(--transition);
         }}
 
         .stat-item:hover {{
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            border-color: var(--bh-red-bright);
         }}
 
         .stat-item strong {{
             display: block;
-            font-size: 1.35rem;
+            font-size: 1.28rem;
             font-weight: 900;
             color: var(--text-primary);
         }}
 
         .stat-item span {{
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             color: var(--text-secondary);
         }}
 
         .hero-showcase {{
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: 22px;
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }}
 
         .showcase-top {{
@@ -1084,8 +1130,9 @@ def render_layout(
         }}
 
         .tag-pill {{
-            background: rgba(16, 185, 129, 0.14);
+            background: rgba(16, 185, 129, 0.15);
             color: var(--bh-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             padding: 5px 12px;
             border-radius: 999px;
             font-size: 0.78rem;
@@ -1099,7 +1146,7 @@ def render_layout(
             align-items: center;
             background: var(--bg-input);
             padding: 12px 14px;
-            border-radius: 14px;
+            border-radius: 15px;
             border: 1px solid var(--border-color);
             transition: var(--transition);
         }}
@@ -1107,6 +1154,7 @@ def render_layout(
         .showcase-row:hover {{
             transform: translateX(-4px);
             border-color: var(--bh-red-bright);
+            background: var(--bg-card-hover);
         }}
 
         .sec-head {{
@@ -1119,7 +1167,7 @@ def render_layout(
         }}
 
         .sec-title {{
-            font-size: 1.35rem;
+            font-size: 1.38rem;
             font-weight: 900;
             display: flex;
             align-items: center;
@@ -1225,7 +1273,7 @@ def render_layout(
             transform: translateY(-6px) scale(1.025);
             border-color: var(--bh-red-bright);
             background: var(--bg-card-hover);
-            box-shadow: 0 16px 32px rgba(255, 42, 68, 0.2);
+            box-shadow: 0 18px 34px rgba(255, 42, 68, 0.22);
         }}
 
         .store-icon-box {{
@@ -1332,7 +1380,7 @@ def render_layout(
             border-color: var(--bh-red-bright);
             background: var(--bg-card-hover);
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 14px 28px rgba(255, 42, 68, 0.18);
+            box-shadow: 0 16px 30px rgba(255, 42, 68, 0.2);
         }}
 
         .cat-badge-icon {{
@@ -1350,7 +1398,7 @@ def render_layout(
         }}
 
         .cat-card:hover .cat-badge-icon {{
-            transform: scale(1.1) rotate(6deg);
+            transform: scale(1.12) rotate(6deg);
             background: linear-gradient(135deg, #CE1126, #FF2A44);
             color: #FFFFFF;
         }}
@@ -1374,18 +1422,19 @@ def render_layout(
         .deal-card {{
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 18px;
+            border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: var(--transition);
             box-shadow: var(--shadow-card);
+            animation: fadeUp 0.35s ease;
         }}
 
         .deal-card:hover {{
-            transform: translateY(-6px) scale(1.015);
+            transform: translateY(-7px) scale(1.015);
             border-color: var(--bh-red-bright);
-            box-shadow: 0 18px 36px rgba(255, 42, 68, 0.18);
+            box-shadow: 0 20px 38px rgba(255, 42, 68, 0.2);
         }}
 
         .deal-thumb {{
@@ -1403,11 +1452,11 @@ def render_layout(
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }}
 
         .deal-card:hover .deal-thumb img {{
-            transform: scale(1.07);
+            transform: scale(1.08);
         }}
 
         .badges-top-right {{
@@ -1421,12 +1470,13 @@ def render_layout(
         }}
 
         .badge-disc {{
-            background: var(--bh-red);
+            background: linear-gradient(135deg, #CE1126, #FF2A44);
             color: #FFFFFF;
             font-weight: 900;
             font-size: 0.78rem;
             padding: 3px 9px;
             border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(206, 17, 38, 0.35);
         }}
 
         .badge-real {{
@@ -1442,7 +1492,7 @@ def render_layout(
             position: absolute;
             bottom: 10px;
             left: 10px;
-            background: rgba(15, 23, 42, 0.86);
+            background: rgba(15, 23, 42, 0.88);
             color: #FDE047;
             font-size: 0.72rem;
             font-weight: 800;
@@ -1466,7 +1516,7 @@ def render_layout(
         }}
 
         .deal-title {{
-            font-size: 0.93rem;
+            font-size: 0.94rem;
             font-weight: 700;
             line-height: 1.45;
             display: -webkit-box;
@@ -1525,7 +1575,7 @@ def render_layout(
 
         .btn-buy:hover {{
             transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(255, 42, 68, 0.35);
+            box-shadow: 0 8px 18px rgba(255, 42, 68, 0.38);
         }}
 
         .btn-hist {{
@@ -1551,12 +1601,14 @@ def render_layout(
             color: #10B981;
         }}
 
-        /* تنسيقات صفحة المفضلة العصرية */
+        /* صفحة المفضلة العصرية المتناسقة مع هوية صيدة */
         .wishlist-banner {{
-            background: linear-gradient(135deg, rgba(255, 42, 68, 0.18), var(--bg-surface) 55%, rgba(245, 158, 11, 0.12));
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255, 42, 68, 0.2), transparent 45%),
+                linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 65%, rgba(245, 158, 11, 0.12) 100%);
             border: 1px solid var(--border-strong);
-            border-radius: 24px;
-            padding: 24px 26px;
+            border-radius: 26px;
+            padding: 26px 28px;
             margin-bottom: 24px;
             box-shadow: var(--shadow-card);
             display: flex;
@@ -1574,15 +1626,16 @@ def render_layout(
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 12px;
+            gap: 14px;
             box-shadow: var(--shadow-card);
             transition: var(--transition);
+            animation: fadeUp 0.35s ease;
         }}
 
         .wishlist-card:hover {{
-            transform: translateY(-5px) scale(1.015);
+            transform: translateY(-6px) scale(1.015);
             border-color: var(--bh-red-bright);
-            box-shadow: 0 18px 34px rgba(255, 42, 68, 0.18);
+            box-shadow: 0 20px 36px rgba(255, 42, 68, 0.2);
         }}
 
         .wishlist-top-row {{
@@ -1605,8 +1658,8 @@ def render_layout(
         .wishlist-empty {{
             background: var(--bg-card);
             border: 1px dashed var(--border-strong);
-            border-radius: 22px;
-            padding: 42px 24px;
+            border-radius: 24px;
+            padding: 46px 24px;
             text-align: center;
             box-shadow: var(--shadow-card);
         }}
@@ -1735,6 +1788,7 @@ def render_layout(
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(6px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -1754,6 +1808,7 @@ def render_layout(
             max-width: 680px;
             padding: 24px;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeUp 0.25s ease;
         }}
 
         .float-tg {{
@@ -1767,7 +1822,7 @@ def render_layout(
             border-radius: 999px;
             font-weight: 800;
             font-size: 0.85rem;
-            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.42);
+            box-shadow: 0 12px 26px rgba(0, 136, 204, 0.44);
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -1830,6 +1885,9 @@ def render_layout(
         @media (max-width: 920px) {{
             .hero-box {{
                 grid-template-columns: 1fr;
+            }}
+            .hero-stats {{
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
             }}
             .footer-grid {{
                 grid-template-columns: 1fr 1fr;
@@ -2402,7 +2460,7 @@ def page_home(request: Request):
     body = f"""
     <section class="hero-box">
         <div>
-            <div class="hero-badge">🇧🇭 صيدة البحرين • متابعة مستمرة للأسعار</div>
+            <div class="hero-badge"><span class="live-dot"></span> صيدة البحرين • متابعة فورية للأسعار</div>
             <h1 class="hero-title">أقوى صيدات البحرين... <span>أول ما تنزل 🎯</span></h1>
             <p class="hero-desc">
                 نراقب الأسعار بالدينار البحريني (BHD / د.ب) في متاجر البحرين ونوريك تاريخ السعر عشان تعرف إذا الخصم صج يسوى ولا بس كلام.
@@ -2809,14 +2867,27 @@ def page_stores(request: Request):
 def page_wishlist(request: Request):
     user = get_current_user(request)
     if not user or not user.get("id"):
-        return HTMLResponse('<script>window.location.href="/login/google?next=%2Fwishlist";</script>')
+        body = """
+        <div class="wishlist-empty">
+            <div style="font-size:2.4rem; margin-bottom:10px;">⭐</div>
+            <h1 style="font-size:1.45rem; font-weight:900; margin-bottom:8px;">سجّل دخولك لفتح قائمة المفضلة</h1>
+            <p style="color:var(--text-secondary); font-size:0.94rem; margin-bottom:20px;">
+                احفظ عروضك المفضلة وتابع أسعارها في البحرين بكل سهولة.
+            </p>
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                <a href="/login/google?next=%2Fwishlist" class="btn-primary">دخول سريع بقوقل</a>
+                <a href="/login" class="btn-outline">دخول بالبريد</a>
+            </div>
+        </div>
+        """
+        return render_layout("المفضلة", "deals", body, user=None)
 
     conn = get_db()
     cur = conn.cursor()
     saved_items = []
     try:
         cur.execute(
-            _sql(conn, "SELECT deal_key, title, price, url FROM saved_deals WHERE user_id = ? ORDER BY created_at DESC"),
+            _sql(conn, "SELECT deal_key, title, price, url, created_at FROM saved_deals WHERE user_id = ? ORDER BY created_at DESC"),
             (int(user["id"]),),
         )
         saved_items = [_row_to_dict(r) for r in cur.fetchall()]
@@ -2826,7 +2897,7 @@ def page_wishlist(request: Request):
     if not saved_items:
         cards_html = """
             <div class="wishlist-empty" style="grid-column: 1 / -1;">
-                <div style="font-size:2.2rem; margin-bottom:10px;">⭐</div>
+                <div style="font-size:2.3rem; margin-bottom:10px;">⭐</div>
                 <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:8px;">قائمة المفضلة فاضية الحين</h2>
                 <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
                     احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
@@ -2837,25 +2908,29 @@ def page_wishlist(request: Request):
     else:
         parts = []
         for it in saved_items:
-            d_key = html.escape(str(it.get("deal_key") or ""))
+            raw_key = str(it.get("deal_key") or "")
+            d_key = html.escape(raw_key)
             d_title = html.escape(str(it.get("title") or "منتج محفوظ"))
             d_price = html.escape(str(it.get("price") or ""))
             d_url = html.escape(apply_affiliate(str(it.get("url") or "#")))
+            d_ago = html.escape(format_time_ago(it.get("created_at")))
             parts.append(f"""
                 <article class="wishlist-card">
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <div class="wishlist-top-row">
                             <span class="wishlist-badge">⭐ محفوظ في المفضلة</span>
-                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">BHD</span>
+                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">{d_ago}</span>
                         </div>
                         <h3 class="deal-title" title="{d_title}">{d_title}</h3>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:12px;">
-                        <div class="price-row" style="background:var(--bg-input); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+                        <div class="price-row" style="background:var(--bg-input); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color); justify-content:space-between;">
                             <span class="price-now">{d_price}</span>
+                            <span style="font-size:0.74rem; color:var(--text-muted); font-weight:700;">BHD</span>
                         </div>
-                        <div class="card-actions" style="grid-template-columns: 1fr auto;">
+                        <div class="card-actions" style="grid-template-columns: 1fr auto auto;">
                             <a href="{d_url}" target="_blank" rel="noopener" class="btn-buy">روح للعرض ↗</a>
+                            <button type="button" class="btn-hist" onclick="openHistoryModal('{d_key}')" title="چوف تاريخ السعر">📊</button>
                             <button type="button" class="btn-hist btn-save saved" onclick="removeSavedItem(this, '{d_key}')">إزالة</button>
                         </div>
                     </div>
@@ -2898,7 +2973,7 @@ def page_wishlist(request: Request):
                 if (remaining === 0) {
                     document.getElementById('wishlistGrid').innerHTML = `
                         <div class="wishlist-empty" style="grid-column: 1 / -1;">
-                            <div style="font-size:2.2rem; margin-bottom:10px;">⭐</div>
+                            <div style="font-size:2.3rem; margin-bottom:10px;">⭐</div>
                             <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:8px;">قائمة المفضلة فاضية الحين</h2>
                             <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
                                 احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
