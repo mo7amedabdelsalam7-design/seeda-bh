@@ -193,6 +193,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="صيدة — لقطات وخصومات البحرين", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 setup_google_auth(app)
+app.router.routes = [r for r in app.router.routes if getattr(r, "path", None) != "/wishlist"]
 
 
 def apply_affiliate(raw_url: str) -> str:
