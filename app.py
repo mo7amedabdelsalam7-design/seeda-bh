@@ -51,23 +51,23 @@ ALLOWED_PROXY_HOSTS = {
 }
 
 STORE_META = {
-    "noon_bh": {"label": "نون البحرين", "badge": "noon", "decimals": 2},
-    "extra_bh": {"label": "إكسترا البحرين", "badge": "eXtra", "decimals": 3},
-    "microless_bh": {"label": "ميكروليس البحرين", "badge": "Microless", "decimals": 3},
-    "alershad_bh": {"label": "الإرشاد البحرين", "badge": "AlErshad", "decimals": 3},
-    "ramez_bh": {"label": "رامز البحرين", "badge": "Ramez", "decimals": 3},
-    "hypermax_bh": {"label": "هايبرماكس البحرين", "badge": "HyperMax", "decimals": 3},
-    "zain_bh": {"label": "زين البحرين", "badge": "zain", "decimals": 3},
-    "stc_bh": {"label": "stc البحرين", "badge": "stc", "decimals": 3},
-    "batelco_bh": {"label": "باتلكو البحرين", "badge": "Batelco", "decimals": 3},
-    "virgin_bh": {"label": "فيرجن ميجاستور البحرين", "badge": "Virgin", "decimals": 2},
-    "jarir_bh": {"label": "مكتبة جرير البحرين", "badge": "جرير", "decimals": 2},
-    "sharafdg_bh": {"label": "شرف DG البحرين", "badge": "SDG", "decimals": 3},
-    "sharaf_bh": {"label": "شرف DG البحرين", "badge": "SDG", "decimals": 3},
-    "ourshopee_bh": {"label": "أور شوبي البحرين", "badge": "OurShopee", "decimals": 2},
-    "advancedpc_bh": {"label": "أدفانسد بي سي البحرين", "badge": "AdvPC", "decimals": 3},
-    "lulu_bh": {"label": "لولو هايبرماركت البحرين", "badge": "LuLu", "decimals": 3},
-    "ansar_bh": {"label": "أنصار جاليري البحرين", "badge": "Ansar", "decimals": 3},
+    "noon_bh": {"label": "نون البحرين", "badge": "noon", "decimals": 2, "logo": "/static/noon_bh.png", "accent": "#FACC15", "text_dark": True},
+    "extra_bh": {"label": "إكسترا البحرين", "badge": "eXtra", "decimals": 3, "logo": "/static/extra_bh.png", "accent": "#1D4ED8", "text_dark": False},
+    "microless_bh": {"label": "ميكروليس البحرين", "badge": "Microless", "decimals": 3, "logo": "/static/microless_bh.png", "accent": "#EA580C", "text_dark": False},
+    "alershad_bh": {"label": "الإرشاد البحرين", "badge": "AlErshad", "decimals": 3, "logo": "/static/alershad_bh.png", "accent": "#92400E", "text_dark": False},
+    "ramez_bh": {"label": "رامز البحرين", "badge": "Ramez", "decimals": 3, "logo": "/static/ramez_bh.png", "accent": "#B91C1C", "text_dark": False},
+    "hypermax_bh": {"label": "هايبرماكس البحرين", "badge": "HyperMax", "decimals": 3, "logo": "/static/hypermax_bh.png", "accent": "#DC2626", "text_dark": False},
+    "zain_bh": {"label": "زين البحرين", "badge": "zain", "decimals": 3, "logo": "/static/zain_bh.png", "accent": "#7E22CE", "text_dark": False},
+    "stc_bh": {"label": "stc البحرين", "badge": "stc", "decimals": 3, "logo": "/static/stc_bh.png", "accent": "#4F008C", "text_dark": False},
+    "batelco_bh": {"label": "باتلكو البحرين", "badge": "Batelco", "decimals": 3, "logo": "/static/batelco_bh.png", "accent": "#E11D48", "text_dark": False},
+    "virgin_bh": {"label": "فيرجن ميجاستور البحرين", "badge": "Virgin", "decimals": 2, "logo": "/static/virgin_bh.png", "accent": "#B91C1C", "text_dark": False},
+    "jarir_bh": {"label": "مكتبة جرير البحرين", "badge": "جرير", "decimals": 2, "logo": "/static/jarir_bh.png", "accent": "#DC2626", "text_dark": False},
+    "sharafdg_bh": {"label": "شرف DG البحرين", "badge": "SDG", "decimals": 3, "logo": "/static/sharafdg_bh.png", "accent": "#D97706", "text_dark": False},
+    "sharaf_bh": {"label": "شرف DG البحرين", "badge": "SDG", "decimals": 3, "logo": "/static/sharafdg_bh.png", "accent": "#D97706", "text_dark": False},
+    "ourshopee_bh": {"label": "أور شوبي البحرين", "badge": "OurShopee", "decimals": 2, "logo": "/static/ourshopee_bh.png", "accent": "#6D28D9", "text_dark": False},
+    "advancedpc_bh": {"label": "أدفانسد بي سي البحرين", "badge": "AdvPC", "decimals": 3, "logo": "/static/advancedpc_bh.png", "accent": "#1E40AF", "text_dark": False},
+    "lulu_bh": {"label": "لولو هايبرماركت البحرين", "badge": "LuLu", "decimals": 3, "logo": "/static/lulu_bh.png", "accent": "#15803D", "text_dark": False},
+    "ansar_bh": {"label": "أنصار جاليري البحرين", "badge": "Ansar", "decimals": 3, "logo": "/static/ansar_bh.png", "accent": "#DB2777", "text_dark": False},
 }
 
 
@@ -248,14 +248,16 @@ def build_header_auth_html(user: Optional[dict]) -> str:
 def resolve_local_product_image(sku: Any, store: Any) -> str:
     sku_str = str(sku or "").strip()
     store_str = str(store or "").strip().lower()
-    if not sku_str or store_str != "microless_bh":
-        return ""
-    safe_sku = "".join(ch for ch in sku_str if ch.isalnum() or ch in {"_", "-"})
-    if not safe_sku:
-        return ""
-    img_file = MICROLESS_IMAGES_DIR / f"{safe_sku}.jpg"
-    if img_file.exists() and img_file.stat().st_size > 500:
-        return f"/static/images/microless/{safe_sku}.jpg"
+    if store_str == "microless_bh":
+        if sku_str:
+            safe_sku = "".join(ch for ch in sku_str if ch.isalnum() or ch in {"_", "-"})
+            if safe_sku:
+                for ext in (".jpg", ".jpeg", ".png", ".webp"):
+                    img_file = MICROLESS_IMAGES_DIR / f"{safe_sku}{ext}"
+                    if img_file.exists() and img_file.stat().st_size > 500:
+                        return f"/static/images/microless/{safe_sku}{ext}"
+        if (STATIC_DIR / "microless_bh.png").exists():
+            return "/static/microless_bh.png"
     return ""
 
 
@@ -503,6 +505,8 @@ def api_products(
         local_img = resolve_local_product_image(d.get("sku"), st_key)
         if local_img:
             d["image_url"] = local_img
+        elif st_key == "microless_bh" and (STATIC_DIR / "microless_bh.png").exists():
+            d["image_url"] = "/static/microless_bh.png"
         d["current_price"] = round(float(d.get("current_price") or 0), dec)
         d["old_price"] = round(float(d["old_price"]), dec) if d.get("old_price") is not None else None
         d["discount_pct"] = float(d.get("discount_pct") or 0)
@@ -661,44 +665,55 @@ def render_layout(
     <style>
         :root {{
             --bh-red: #CE1126;
-            --bh-red-bright: #EF233C;
-            --bh-red-soft: rgba(206, 17, 38, 0.14);
+            --bh-red-bright: #FF2A44;
+            --bh-red-soft: rgba(255, 42, 68, 0.16);
             --bh-gold: #F59E0B;
             --bh-green: #10B981;
+            --bh-cyan: #38BDF8;
             --radius-xl: 22px;
             --radius-lg: 16px;
             --radius-md: 12px;
-            --transition: all 0.22s ease;
+            --transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
         }}
 
         html[data-theme="dark"] {{
-            --bg-main: #0B0D12;
-            --bg-surface: #131722;
-            --bg-card: #181D2B;
-            --bg-card-hover: #1E2536;
-            --bg-input: #0F131C;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-strong: rgba(206, 17, 38, 0.38);
+            --bg-main: #090C12;
+            --bg-surface: #111622;
+            --bg-card: #161C2C;
+            --bg-card-hover: #1E273D;
+            --bg-input: #0C1018;
+            --border-color: rgba(255, 255, 255, 0.09);
+            --border-strong: rgba(255, 42, 68, 0.42);
             --text-primary: #F8FAFC;
             --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.35);
-            --header-bg: #11151F;
+            --shadow-card: 0 14px 34px rgba(0, 0, 0, 0.42);
+            --header-bg: rgba(13, 17, 27, 0.94);
         }}
 
         html[data-theme="light"] {{
-            --bg-main: #F6F7FB;
+            --bg-main: #F4F6FB;
             --bg-surface: #FFFFFF;
             --bg-card: #FFFFFF;
-            --bg-card-hover: #FFF8F8;
-            --bg-input: #F1F3F9;
+            --bg-card-hover: #FFF7F8;
+            --bg-input: #EEF2F8;
             --border-color: rgba(15, 23, 42, 0.09);
-            --border-strong: rgba(206, 17, 38, 0.35);
+            --border-strong: rgba(206, 17, 38, 0.36);
             --text-primary: #0F172A;
             --text-secondary: #475569;
             --text-muted: #64748B;
-            --shadow-card: 0 10px 26px rgba(15, 23, 42, 0.07);
-            --header-bg: #FFFFFF;
+            --shadow-card: 0 12px 28px rgba(15, 23, 42, 0.08);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }}
+
+        @keyframes pulseGlow {{
+            0%, 100% {{ transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.45); }}
+            50% {{ transform: scale(1.12); box-shadow: 0 0 0 6px rgba(255, 42, 68, 0); }}
+        }}
+
+        @keyframes floatSoft {{
+            0%, 100% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-4px); }}
         }}
 
         * {{
@@ -709,7 +724,10 @@ def render_layout(
         }}
 
         body {{
-            background: var(--bg-main);
+            background:
+                radial-gradient(circle at 12% 8%, rgba(255, 42, 68, 0.09), transparent 36%),
+                radial-gradient(circle at 88% 18%, rgba(56, 189, 248, 0.07), transparent 34%),
+                var(--bg-main);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -724,14 +742,16 @@ def render_layout(
 
         .container {{
             width: 100%;
-            max-width: 1340px;
+            max-width: 1360px;
             margin: 0 auto;
             padding: 0 20px;
         }}
 
         .navbar {{
-            position: relative;
-            z-index: 50;
+            position: sticky;
+            top: 0;
+            z-index: 60;
+            backdrop-filter: blur(14px);
             background: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
         }}
@@ -741,7 +761,7 @@ def render_layout(
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            min-height: 68px;
+            min-height: 70px;
             flex-wrap: wrap;
             padding: 10px 0;
         }}
@@ -751,12 +771,17 @@ def render_layout(
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            transition: var(--transition);
+        }}
+
+        .brand-link:hover {{
+            transform: translateY(-1px) scale(1.015);
         }}
 
         .brand-logo-img {{
             height: 40px;
             width: auto;
-            border-radius: 10px;
+            border-radius: 11px;
             object-fit: contain;
         }}
 
@@ -775,7 +800,7 @@ def render_layout(
         }}
 
         .brand-title {{
-            font-size: 1.2rem;
+            font-size: 1.22rem;
             font-weight: 900;
             letter-spacing: -0.3px;
             display: flex;
@@ -796,7 +821,7 @@ def render_layout(
         .nav-search {{
             flex: 1;
             min-width: 220px;
-            max-width: 390px;
+            max-width: 400px;
             position: relative;
         }}
 
@@ -805,7 +830,7 @@ def render_layout(
             background: var(--bg-input);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 9px 40px 9px 14px;
+            padding: 9px 42px 9px 14px;
             border-radius: 999px;
             font-size: 0.88rem;
             outline: none;
@@ -815,6 +840,7 @@ def render_layout(
         .nav-search input:focus {{
             border-color: var(--bh-red-bright);
             box-shadow: 0 0 0 3px var(--bh-red-soft);
+            transform: translateY(-1px);
         }}
 
         .nav-search button {{
@@ -827,6 +853,11 @@ def render_layout(
             color: var(--text-secondary);
             cursor: pointer;
             font-size: 1rem;
+            transition: var(--transition);
+        }}
+
+        .nav-search button:hover {{
+            transform: translateY(-50%) scale(1.15);
         }}
 
         .nav-links {{
@@ -837,8 +868,8 @@ def render_layout(
         }}
 
         .nav-link {{
-            padding: 7px 12px;
-            border-radius: 10px;
+            padding: 7px 13px;
+            border-radius: 11px;
             font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-secondary);
@@ -852,21 +883,22 @@ def render_layout(
         .nav-link:hover {{
             color: var(--text-primary);
             background: var(--bg-card);
+            transform: translateY(-2px);
         }}
 
         .nav-link.active {{
             color: #FFFFFF;
-            background: var(--bh-red);
-            box-shadow: 0 6px 16px rgba(206, 17, 38, 0.32);
+            background: linear-gradient(135deg, #CE1126, #FF2A44);
+            box-shadow: 0 6px 18px rgba(206, 17, 38, 0.35);
         }}
 
         .live-dot {{
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #EF4444;
+            background: #FF2A44;
             display: inline-block;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+            animation: pulseGlow 1.9s infinite;
         }}
 
         .nav-actions {{
@@ -893,11 +925,12 @@ def render_layout(
 
         .theme-btn:hover {{
             border-color: var(--bh-red-bright);
+            transform: translateY(-2px) rotate(8deg);
         }}
 
         .btn-outline {{
-            padding: 7px 12px;
-            border-radius: 10px;
+            padding: 8px 14px;
+            border-radius: 11px;
             border: 1px solid var(--border-color);
             background: var(--bg-card);
             color: var(--text-primary);
@@ -905,52 +938,65 @@ def render_layout(
             font-size: 0.84rem;
             transition: var(--transition);
             white-space: nowrap;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }}
 
         .btn-outline:hover {{
             border-color: var(--bh-red-bright);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
         }}
 
         .btn-primary {{
-            padding: 7px 14px;
-            border-radius: 10px;
+            padding: 8px 15px;
+            border-radius: 11px;
             border: none;
-            background: linear-gradient(135deg, #CE1126, #EF233C);
+            background: linear-gradient(135deg, #CE1126, #FF2A44);
             color: #FFFFFF;
             font-weight: 800;
             font-size: 0.84rem;
             cursor: pointer;
-            box-shadow: 0 6px 18px rgba(206, 17, 38, 0.32);
+            box-shadow: 0 7px 20px rgba(206, 17, 38, 0.34);
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             white-space: nowrap;
         }}
 
         .btn-primary:hover {{
-            transform: translateY(-1px);
-            filter: brightness(1.06);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 11px 24px rgba(255, 42, 68, 0.44);
         }}
 
         main {{
             flex: 1;
-            padding: 22px 0 60px;
+            padding: 24px 0 64px;
         }}
 
         .hero-box {{
             position: relative;
             overflow: hidden;
             border-radius: 26px;
-            background: linear-gradient(135deg, rgba(206, 17, 38, 0.16) 0%, var(--bg-surface) 48%, rgba(206, 17, 38, 0.08) 100%);
+            background: linear-gradient(135deg, rgba(255, 42, 68, 0.16) 0%, var(--bg-surface) 48%, rgba(56, 189, 248, 0.08) 100%);
             border: 1px solid var(--border-strong);
             padding: 34px 32px;
-            margin-bottom: 34px;
+            margin-bottom: 36px;
             box-shadow: var(--shadow-card);
             display: grid;
             grid-template-columns: 1.45fr 1fr;
             gap: 28px;
             align-items: center;
+            transition: var(--transition);
+        }}
+
+        .hero-box:hover {{
+            box-shadow: 0 18px 42px rgba(206, 17, 38, 0.18);
         }}
 
         .hero-badge {{
@@ -959,7 +1005,7 @@ def render_layout(
             gap: 8px;
             background: var(--bh-red-soft);
             color: var(--bh-red-bright);
-            border: 1px solid rgba(239, 35, 60, 0.35);
+            border: 1px solid rgba(255, 42, 68, 0.35);
             padding: 6px 14px;
             border-radius: 999px;
             font-size: 0.82rem;
@@ -1001,6 +1047,14 @@ def render_layout(
             border-top: 1px solid var(--border-color);
         }}
 
+        .stat-item {{
+            transition: var(--transition);
+        }}
+
+        .stat-item:hover {{
+            transform: translateY(-2px);
+        }}
+
         .stat-item strong {{
             display: block;
             font-size: 1.35rem;
@@ -1032,10 +1086,11 @@ def render_layout(
         .tag-pill {{
             background: rgba(16, 185, 129, 0.14);
             color: var(--bh-green);
-            padding: 4px 11px;
+            padding: 5px 12px;
             border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 800;
+            white-space: nowrap;
         }}
 
         .showcase-row {{
@@ -1046,6 +1101,12 @@ def render_layout(
             padding: 12px 14px;
             border-radius: 14px;
             border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }}
+
+        .showcase-row:hover {{
+            transform: translateX(-4px);
+            border-color: var(--bh-red-bright);
         }}
 
         .sec-head {{
@@ -1068,16 +1129,83 @@ def render_layout(
         .sec-sub {{
             font-size: 0.86rem;
             color: var(--text-secondary);
+            margin-top: 2px;
         }}
 
-        .stores-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+        .sec-head-actions {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }}
+
+        .strip-wrap {{
+            position: relative;
+            margin-bottom: 38px;
+        }}
+
+        .strip-controls {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }}
+
+        .strip-arrow {{
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }}
+
+        .strip-arrow:hover {{
+            border-color: var(--bh-red-bright);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px) scale(1.06);
+        }}
+
+        /* شريط المتاجر الأفقي الموحد في الديسكتوب والموبايل */
+        .stores-strip {{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             gap: 14px;
-            margin-bottom: 36px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 6px 4px 14px;
+            cursor: grab;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 42, 68, 0.45) transparent;
+        }}
+
+        .stores-strip:active {{
+            cursor: grabbing;
+        }}
+
+        .stores-strip::-webkit-scrollbar {{
+            height: 7px;
+        }}
+
+        .stores-strip::-webkit-scrollbar-thumb {{
+            background: rgba(255, 42, 68, 0.45);
+            border-radius: 999px;
         }}
 
         .store-card {{
+            flex: 0 0 212px;
+            min-width: 212px;
+            scroll-snap-align: start;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
@@ -1085,66 +1213,132 @@ def render_layout(
             text-align: center;
             transition: var(--transition);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-card);
+            user-select: none;
         }}
 
         .store-card:hover {{
-            transform: translateY(-3px);
+            transform: translateY(-6px) scale(1.025);
             border-color: var(--bh-red-bright);
             background: var(--bg-card-hover);
+            box-shadow: 0 16px 32px rgba(255, 42, 68, 0.2);
         }}
 
-        .store-icon {{
-            width: 52px;
-            height: 52px;
-            border-radius: 15px;
-            margin: 0 auto 10px;
+        .store-icon-box {{
+            width: 66px;
+            height: 66px;
+            border-radius: 18px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px;
+            overflow: hidden;
+            background: #FFFFFF;
+            border: 2px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+            transition: var(--transition);
+        }}
+
+        .store-card:hover .store-icon-box {{
+            transform: scale(1.08) rotate(-2deg);
+        }}
+
+        .store-logo-img {{
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }}
+
+        .store-fallback-badge {{
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
             font-size: 0.78rem;
+            text-align: center;
+            padding: 2px;
         }}
 
         .store-name {{
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.98rem;
             margin-bottom: 4px;
+            line-height: 1.3;
         }}
 
         .store-meta {{
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--bh-green);
             font-weight: 700;
         }}
 
-        .cats-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        /* شريط الأقسام الأفقي الموحد في الديسكتوب والموبايل */
+        .cats-strip {{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             gap: 14px;
-            margin-bottom: 36px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 6px 4px 14px;
+            cursor: grab;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 42, 68, 0.45) transparent;
+        }}
+
+        .cats-strip:active {{
+            cursor: grabbing;
+        }}
+
+        .cats-strip::-webkit-scrollbar {{
+            height: 7px;
+        }}
+
+        .cats-strip::-webkit-scrollbar-thumb {{
+            background: rgba(255, 42, 68, 0.45);
+            border-radius: 999px;
         }}
 
         .cat-card {{
+            flex: 0 0 268px;
+            min-width: 268px;
+            scroll-snap-align: start;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            padding: 16px 18px;
+            padding: 15px 17px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
             transition: var(--transition);
+            box-shadow: var(--shadow-card);
+            user-select: none;
         }}
 
         .cat-card:hover {{
             border-color: var(--bh-red-bright);
-            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(255, 42, 68, 0.18);
         }}
 
         .cat-badge-icon {{
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
             background: var(--bh-red-soft);
             color: var(--bh-red-bright);
             display: flex;
@@ -1152,11 +1346,28 @@ def render_layout(
             justify-content: center;
             font-size: 1.25rem;
             flex-shrink: 0;
+            transition: var(--transition);
+        }}
+
+        .cat-card:hover .cat-badge-icon {{
+            transform: scale(1.1) rotate(6deg);
+            background: linear-gradient(135deg, #CE1126, #FF2A44);
+            color: #FFFFFF;
+        }}
+
+        .cat-arrow {{
+            font-weight: 900;
+            color: var(--bh-red-bright);
+            transition: var(--transition);
+        }}
+
+        .cat-card:hover .cat-arrow {{
+            transform: translateX(-4px);
         }}
 
         .products-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
             gap: 18px;
         }}
 
@@ -1172,8 +1383,9 @@ def render_layout(
         }}
 
         .deal-card:hover {{
-            transform: translateY(-4px);
+            transform: translateY(-6px) scale(1.015);
             border-color: var(--bh-red-bright);
+            box-shadow: 0 18px 36px rgba(255, 42, 68, 0.18);
         }}
 
         .deal-thumb {{
@@ -1184,12 +1396,18 @@ def render_layout(
             align-items: center;
             justify-content: center;
             padding: 14px;
+            overflow: hidden;
         }}
 
         .deal-thumb img {{
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+        }}
+
+        .deal-card:hover .deal-thumb img {{
+            transform: scale(1.07);
         }}
 
         .badges-top-right {{
@@ -1199,6 +1417,7 @@ def render_layout(
             display: flex;
             flex-direction: column;
             gap: 5px;
+            z-index: 2;
         }}
 
         .badge-disc {{
@@ -1223,12 +1442,13 @@ def render_layout(
             position: absolute;
             bottom: 10px;
             left: 10px;
-            background: rgba(15, 23, 42, 0.82);
+            background: rgba(15, 23, 42, 0.86);
             color: #FDE047;
             font-size: 0.72rem;
             font-weight: 800;
-            padding: 3px 9px;
+            padding: 4px 10px;
             border-radius: 8px;
+            z-index: 2;
         }}
 
         .deal-body {{
@@ -1281,8 +1501,9 @@ def render_layout(
             font-size: 0.75rem;
             color: var(--text-secondary);
             background: var(--bg-input);
-            padding: 7px 10px;
+            padding: 8px 10px;
             border-radius: 10px;
+            border: 1px solid var(--border-color);
         }}
 
         .card-actions {{
@@ -1292,7 +1513,7 @@ def render_layout(
         }}
 
         .btn-buy {{
-            background: var(--bh-red);
+            background: linear-gradient(135deg, #CE1126, #FF2A44);
             color: #FFFFFF;
             text-align: center;
             padding: 9px 10px;
@@ -1303,7 +1524,8 @@ def render_layout(
         }}
 
         .btn-buy:hover {{
-            background: var(--bh-red-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(255, 42, 68, 0.35);
         }}
 
         .btn-hist {{
@@ -1320,12 +1542,73 @@ def render_layout(
 
         .btn-hist:hover {{
             border-color: var(--bh-red-bright);
+            transform: translateY(-2px) scale(1.04);
         }}
 
         .btn-save.saved {{
             background: rgba(16, 185, 129, 0.18);
             border-color: #10B981;
             color: #10B981;
+        }}
+
+        /* تنسيقات صفحة المفضلة العصرية */
+        .wishlist-banner {{
+            background: linear-gradient(135deg, rgba(255, 42, 68, 0.18), var(--bg-surface) 55%, rgba(245, 158, 11, 0.12));
+            border: 1px solid var(--border-strong);
+            border-radius: 24px;
+            padding: 24px 26px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }}
+
+        .wishlist-card {{
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }}
+
+        .wishlist-card:hover {{
+            transform: translateY(-5px) scale(1.015);
+            border-color: var(--bh-red-bright);
+            box-shadow: 0 18px 34px rgba(255, 42, 68, 0.18);
+        }}
+
+        .wishlist-top-row {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }}
+
+        .wishlist-badge {{
+            background: rgba(245, 158, 11, 0.16);
+            color: #FBBF24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }}
+
+        .wishlist-empty {{
+            background: var(--bg-card);
+            border: 1px dashed var(--border-strong);
+            border-radius: 22px;
+            padding: 42px 24px;
+            text-align: center;
+            box-shadow: var(--shadow-card);
         }}
 
         .filter-bar {{
@@ -1338,6 +1621,7 @@ def render_layout(
             flex-wrap: wrap;
             gap: 12px;
             align-items: center;
+            box-shadow: var(--shadow-card);
         }}
 
         .filter-bar select, .filter-bar input {{
@@ -1348,6 +1632,11 @@ def render_layout(
             border-radius: 11px;
             font-size: 0.88rem;
             outline: none;
+            transition: var(--transition);
+        }}
+
+        .filter-bar select:focus, .filter-bar input:focus {{
+            border-color: var(--bh-red-bright);
         }}
 
         .chip-toggle {{
@@ -1359,6 +1648,12 @@ def render_layout(
             font-weight: 700;
             font-size: 0.86rem;
             cursor: pointer;
+            transition: var(--transition);
+        }}
+
+        .chip-toggle:hover {{
+            transform: translateY(-2px);
+            border-color: var(--bh-red-bright);
         }}
 
         .chip-toggle.active {{
@@ -1370,12 +1665,19 @@ def render_layout(
         .coupon-card {{
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-top: 4px solid var(--bh-red);
+            border-top: 4px solid var(--bh-red-bright);
             border-radius: 18px;
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }}
+
+        .coupon-card:hover {{
+            transform: translateY(-4px);
+            border-color: var(--bh-red-bright);
         }}
 
         .coupon-code-box {{
@@ -1390,6 +1692,11 @@ def render_layout(
             font-weight: 900;
             font-size: 1.1rem;
             color: var(--bh-red-bright);
+            transition: var(--transition);
+        }}
+
+        .coupon-code-box:hover {{
+            transform: scale(1.02);
         }}
 
         .auth-wrap {{
@@ -1456,19 +1763,20 @@ def render_layout(
             z-index: 90;
             background: linear-gradient(135deg, #0088cc, #229ED9);
             color: #FFFFFF;
-            padding: 11px 16px;
+            padding: 11px 17px;
             border-radius: 999px;
             font-weight: 800;
             font-size: 0.85rem;
-            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.38);
+            box-shadow: 0 10px 25px rgba(0, 136, 204, 0.42);
             display: inline-flex;
             align-items: center;
             gap: 8px;
             transition: var(--transition);
+            animation: floatSoft 3.2s ease-in-out infinite;
         }}
 
         .float-tg:hover {{
-            transform: translateY(-2px);
+            transform: translateY(-4px) scale(1.04);
         }}
 
         footer {{
@@ -1501,8 +1809,14 @@ def render_layout(
             color: var(--text-secondary);
         }}
 
+        .footer-col ul a {{
+            transition: var(--transition);
+            display: inline-block;
+        }}
+
         .footer-col ul a:hover {{
             color: var(--bh-red-bright);
+            transform: translateX(-3px);
         }}
 
         .footer-bottom {{
@@ -1550,9 +1864,9 @@ def render_layout(
                 border-radius: 8px;
             }}
             .btn-outline, .btn-primary {{
-                padding: 5px 9px;
-                font-size: 0.75rem;
-                border-radius: 8px;
+                padding: 6px 10px;
+                font-size: 0.76rem;
+                border-radius: 9px;
             }}
             .nav-search {{
                 order: 3;
@@ -1581,6 +1895,20 @@ def render_layout(
                 padding: 5px 10px;
                 font-size: 0.8rem;
                 white-space: nowrap;
+            }}
+            .store-card {{
+                flex: 0 0 168px;
+                min-width: 168px;
+                padding: 14px 10px;
+            }}
+            .store-icon-box {{
+                width: 56px;
+                height: 56px;
+            }}
+            .cat-card {{
+                flex: 0 0 228px;
+                min-width: 228px;
+                padding: 13px 14px;
             }}
             .footer-grid {{
                 grid-template-columns: 1fr;
@@ -1737,28 +2065,104 @@ def render_layout(
                 .replace(/"/g, '&quot;');
         }}
 
+        const STORE_VISUALS = {{
+            noon_bh: {{ label: 'نون البحرين', badge: 'noon', logo: '/static/noon_bh.png', bg: '#FACC15', fg: '#111827', border: 'rgba(250, 204, 21, 0.55)' }},
+            extra_bh: {{ label: 'إكسترا البحرين', badge: 'eXtra', logo: '/static/extra_bh.png', bg: '#1D4ED8', fg: '#FFFFFF', border: 'rgba(59, 130, 246, 0.55)' }},
+            microless_bh: {{ label: 'ميكروليس البحرين', badge: 'Microless', logo: '/static/microless_bh.png', bg: '#EA580C', fg: '#FFFFFF', border: 'rgba(249, 115, 22, 0.55)' }},
+            alershad_bh: {{ label: 'الإرشاد البحرين', badge: 'AlErshad', logo: '/static/alershad_bh.png', bg: '#92400E', fg: '#FFFFFF', border: 'rgba(180, 83, 9, 0.55)' }},
+            ramez_bh: {{ label: 'رامز البحرين', badge: 'Ramez', logo: '/static/ramez_bh.png', bg: '#B91C1C', fg: '#FFFFFF', border: 'rgba(220, 38, 38, 0.55)' }},
+            hypermax_bh: {{ label: 'هايبرماكس البحرين', badge: 'HyperMax', logo: '/static/hypermax_bh.png', bg: '#DC2626', fg: '#FFFFFF', border: 'rgba(239, 68, 68, 0.55)' }},
+            ansar_bh: {{ label: 'أنصار جاليري البحرين', badge: 'Ansar', logo: '/static/ansar_bh.png', bg: '#DB2777', fg: '#FFFFFF', border: 'rgba(236, 72, 153, 0.55)' }},
+            zain_bh: {{ label: 'زين البحرين', badge: 'zain', logo: '/static/zain_bh.png', bg: '#7E22CE', fg: '#FFFFFF', border: 'rgba(168, 85, 247, 0.55)' }},
+            stc_bh: {{ label: 'stc البحرين', badge: 'stc', logo: '/static/stc_bh.png', bg: '#4F008C', fg: '#FFFFFF', border: 'rgba(192, 38, 211, 0.55)' }},
+            batelco_bh: {{ label: 'باتلكو البحرين', badge: 'Batelco', logo: '/static/batelco_bh.png', bg: '#E11D48', fg: '#FFFFFF', border: 'rgba(225, 29, 72, 0.55)' }},
+            virgin_bh: {{ label: 'فيرجن ميجاستور البحرين', badge: 'Virgin', logo: '/static/virgin_bh.png', bg: '#B91C1C', fg: '#FFFFFF', border: 'rgba(239, 68, 68, 0.55)' }},
+            jarir_bh: {{ label: 'مكتبة جرير البحرين', badge: 'جرير', logo: '/static/jarir_bh.png', bg: '#DC2626', fg: '#FFFFFF', border: 'rgba(220, 38, 38, 0.55)' }},
+            sharafdg_bh: {{ label: 'شرف DG البحرين', badge: 'SDG', logo: '/static/sharafdg_bh.png', bg: '#D97706', fg: '#FFFFFF', border: 'rgba(245, 158, 11, 0.55)' }},
+            sharaf_bh: {{ label: 'شرف DG البحرين', badge: 'SDG', logo: '/static/sharafdg_bh.png', bg: '#D97706', fg: '#FFFFFF', border: 'rgba(245, 158, 11, 0.55)' }},
+            ourshopee_bh: {{ label: 'أور شوبي البحرين', badge: 'OurShopee', logo: '/static/ourshopee_bh.png', bg: '#6D28D9', fg: '#FFFFFF', border: 'rgba(124, 58, 237, 0.55)' }},
+            advancedpc_bh: {{ label: 'أدفانسد بي سي البحرين', badge: 'AdvPC', logo: '/static/advancedpc_bh.png', bg: '#1E40AF', fg: '#FFFFFF', border: 'rgba(37, 99, 235, 0.55)' }},
+            lulu_bh: {{ label: 'لولو هايبرماركت البحرين', badge: 'LuLu', logo: '/static/lulu_bh.png', bg: '#15803D', fg: '#FFFFFF', border: 'rgba(22, 163, 74, 0.55)' }}
+        }};
+
         function getStoreLabel(storeKey) {{
+            if (STORE_VISUALS[storeKey]) return STORE_VISUALS[storeKey].label;
             const map = {{
-                extra_bh: 'إكسترا البحرين',
-                microless_bh: 'ميكروليس البحرين',
-                alershad_bh: 'الإرشاد البحرين',
-                ramez_bh: 'رامز البحرين',
-                hypermax_bh: 'هايبرماكس البحرين',
-                ansar_bh: 'أنصار جاليري البحرين',
-                zain_bh: 'زين البحرين',
-                stc_bh: 'stc البحرين',
-                batelco_bh: 'باتلكو البحرين',
-                virgin_bh: 'فيرجن ميجاستور البحرين',
-                jarir_bh: 'مكتبة جرير البحرين',
-                sharafdg_bh: 'شرف DG البحرين',
-                sharaf_bh: 'شرف DG البحرين',
-                ourshopee_bh: 'أور شوبي البحرين',
-                advancedpc_bh: 'أدفانسد بي سي البحرين',
-                lulu_bh: 'لولو هايبرماركت البحرين',
                 ashraf_bh: 'أشرف البحرين',
                 talabat_bh: 'طلبات البحرين'
             }};
             return map[storeKey] || 'نون البحرين';
+        }}
+
+        function getStoreLogo(storeKey) {{
+            if (STORE_VISUALS[storeKey] && STORE_VISUALS[storeKey].logo) {{
+                return STORE_VISUALS[storeKey].logo;
+            }}
+            return '/favicon.svg';
+        }}
+
+        function renderStoreIconHtml(storeKey) {{
+            const info = STORE_VISUALS[storeKey] || {{ badge: 'BH', logo: '/favicon.svg', bg: '#CE1126', fg: '#FFFFFF' }};
+            return `
+                <div class="store-icon-box">
+                    <img
+                        src="${{escapeHtml(info.logo)}}"
+                        alt="${{escapeHtml(info.badge)}}"
+                        class="store-logo-img"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    />
+                    <span class="store-fallback-badge" style="display:none; background:${{info.bg}}; color:${{info.fg}};">${{escapeHtml(info.badge)}}</span>
+                </div>
+            `;
+        }}
+
+        function scrollHorizontalStrip(containerId, direction) {{
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const amount = Math.max(260, Math.round(el.clientWidth * 0.72));
+            el.scrollBy({{ left: direction * amount, behavior: 'smooth' }});
+        }}
+
+        function enableDragScroll(containerId) {{
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            let isDown = false;
+            let startX = 0;
+            let scrollLeft = 0;
+            let moved = false;
+
+            el.addEventListener('mousedown', (e) => {{
+                if (e.button !== 0) return;
+                isDown = true;
+                moved = false;
+                startX = e.pageX - el.offsetLeft;
+                scrollLeft = el.scrollLeft;
+            }});
+
+            window.addEventListener('mouseup', () => {{
+                isDown = false;
+            }});
+
+            el.addEventListener('mouseleave', () => {{
+                isDown = false;
+            }});
+
+            el.addEventListener('mousemove', (e) => {{
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - el.offsetLeft;
+                const walk = (x - startX) * 1.35;
+                if (Math.abs(walk) > 6) moved = true;
+                el.scrollLeft = scrollLeft - walk;
+            }});
+
+            el.addEventListener('click', (e) => {{
+                if (moved) {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moved = false;
+                }}
+            }}, true);
         }}
 
         function getDecimalsByStore(storeKey) {{
@@ -1810,6 +2214,11 @@ def render_layout(
                 imgEl.src = imgEl.dataset.origin;
                 return;
             }}
+            if (step <= 2 && imgEl.dataset.storeLogo) {{
+                imgEl.dataset.imgStep = '3';
+                imgEl.src = imgEl.dataset.storeLogo;
+                return;
+            }}
             imgEl.onerror = null;
             imgEl.src = '/favicon.svg';
         }}
@@ -1839,6 +2248,7 @@ def render_layout(
         function renderProductCard(p) {{
             const storeKey = p.store || (String(p.sku || '').startsWith('ANSAR_') ? 'ansar_bh' : 'noon_bh');
             const storeLabel = getStoreLabel(storeKey);
+            const storeLogo = getStoreLogo(storeKey);
             const currStr = fmtPrice(p.current_price, storeKey);
             const oldStr = p.old_price ? fmtPrice(p.old_price, storeKey) : null;
             const lowStr = fmtPrice(p.lowest_price, storeKey);
@@ -1846,15 +2256,17 @@ def render_layout(
             const unitSuffix = 'د.ب';
 
             const rawImg = String(p.image_url || '').trim();
-            const isLocalImg = rawImg.startsWith('/static/images/') && !isBannedBannerUrl(rawImg);
+            const isLocalImg = rawImg.startsWith('/static/') && !isBannedBannerUrl(rawImg);
             const isHttpImg = /^https?:\/\//i.test(rawImg) && !isBannedBannerUrl(rawImg);
 
             const localSrc = isLocalImg ? rawImg : '';
             const originImg = isHttpImg ? rawImg : '';
             const proxyImg = isHttpImg ? ('/img-proxy?url=' + encodeURIComponent(rawImg)) : '';
 
-            const primaryImg = localSrc || proxyImg || originImg || '/favicon.svg';
-            const initialStep = localSrc ? '0' : (proxyImg ? '1' : (originImg ? '2' : '3'));
+            const primaryImg = (storeKey === 'microless_bh')
+                ? (localSrc || storeLogo || proxyImg || originImg || '/favicon.svg')
+                : (localSrc || proxyImg || originImg || storeLogo || '/favicon.svg');
+            const initialStep = localSrc ? '0' : (proxyImg ? '1' : (originImg ? '2' : (storeLogo ? '3' : '4')));
 
             const oldHtml = oldStr ? `<span class="price-old">${{oldStr}} ${{unitSuffix}}</span>` : '';
             const discHtml = p.discount_pct > 0 ? `<span class="badge-disc">-${{Math.round(p.discount_pct)}}%</span>` : '';
@@ -1871,7 +2283,7 @@ def render_layout(
                     <div class="deal-thumb">
                         <div class="badges-top-right">${{discHtml}}${{realHtml}}</div>
                         <span class="badge-store">${{escapeHtml(storeLabel)}}</span>
-                        <img src="${{escapeHtml(primaryImg)}}" data-proxy="${{escapeHtml(proxyImg)}}" data-origin="${{escapeHtml(originImg)}}" data-img-step="${{initialStep}}" alt="${{escapeHtml(p.name)}}" loading="lazy" onerror="handleProductImageError(this)" />
+                        <img src="${{escapeHtml(primaryImg)}}" data-proxy="${{escapeHtml(proxyImg)}}" data-origin="${{escapeHtml(originImg)}}" data-store-logo="${{escapeHtml(storeLogo)}}" data-img-step="${{initialStep}}" alt="${{escapeHtml(p.name)}}" loading="lazy" onerror="handleProductImageError(this)" />
                     </div>
                     <div class="deal-body">
                         <div class="deal-cat">${{escapeHtml(p.category || 'عام')}} • ${{escapeHtml(p.updated_ago || '')}}</div>
@@ -1932,8 +2344,8 @@ def render_layout(
                         datasets: [{{
                             label: 'السعر (BHD)',
                             data: prices,
-                            borderColor: '#EF233C',
-                            backgroundColor: 'rgba(239, 35, 60, 0.16)',
+                            borderColor: '#FF2A44',
+                            backgroundColor: 'rgba(255, 42, 68, 0.16)',
                             fill: true,
                             tension: 0.3,
                             pointRadius: 4
@@ -1962,6 +2374,31 @@ def render_layout(
 @app.get("/", response_class=HTMLResponse)
 def page_home(request: Request):
     user = get_current_user(request)
+    store_order = [
+        "noon_bh", "extra_bh", "microless_bh", "alershad_bh",
+        "ramez_bh", "hypermax_bh", "ansar_bh", "zain_bh",
+        "stc_bh", "batelco_bh", "virgin_bh", "jarir_bh",
+        "sharafdg_bh", "ourshopee_bh", "advancedpc_bh", "lulu_bh"
+    ]
+    store_cards_parts = []
+    for k in store_order:
+        meta = STORE_META[k]
+        icon_html = f"""
+            <div class="store-icon-box">
+                <img src="{meta['logo']}" alt="{html.escape(meta['badge'])}" class="store-logo-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                <span class="store-fallback-badge" style="display:none; background:{meta['accent']}; color:{'#111827' if meta['text_dark'] else '#FFFFFF'};">{html.escape(meta['badge'])}</span>
+            </div>
+        """
+        store_cards_parts.append(f"""
+            <a href="/deals?store={k}" class="store-card" style="border-color: rgba(255, 255, 255, 0.12);">
+                {icon_html}
+                <div class="store-name">{html.escape(meta['label'])}</div>
+                <div class="store-meta" id="homeMeta_{k}">شغال الحين • BHD</div>
+            </a>
+        """)
+    stores_cards_html = "".join(store_cards_parts)
+
     body = f"""
     <section class="hero-box">
         <div>
@@ -2013,107 +2450,40 @@ def page_home(request: Request):
         </div>
     </section>
 
-    <section>
+    <section class="strip-wrap">
         <div class="sec-head">
             <div>
                 <h2 class="sec-title">🏬 المتاجر في البحرين</h2>
-                <div class="sec-sub">نون وإكسترا وميكروليس والإرشاد ورامز وهايبرماكس وأنصار جاليري ولولو وزين وstc وباتلكو وفيرجن وجرير وشرف DG وأور شوبي وأدفانسد بي سي البحرين شغالين الحين</div>
+                <div class="sec-sub">اسحب يمين ويسار في الشريط أو اضغط على أي متجر أو افتح صفحة كل المتاجر</div>
             </div>
-            <a href="/stores" class="btn-outline">كل المتاجر ←</a>
+            <div class="sec-head-actions">
+                <div class="strip-controls">
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', 1)" aria-label="التالي">→</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', -1)" aria-label="السابق">←</button>
+                </div>
+                <a href="/stores" class="btn-outline">كل المتاجر ←</a>
+            </div>
         </div>
-        <div class="stores-grid">
-            <a href="/deals?store=noon_bh" class="store-card" style="border-color: rgba(250, 204, 21, 0.45);">
-                <div class="store-icon" style="background:#FACC15; color:#111827;">noon</div>
-                <div class="store-name">نون البحرين</div>
-                <div class="store-meta" id="noonStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=extra_bh" class="store-card" style="border-color: rgba(59, 130, 246, 0.5);">
-                <div class="store-icon" style="background:#1D4ED8; color:#FFFFFF;">eXtra</div>
-                <div class="store-name">إكسترا البحرين</div>
-                <div class="store-meta" id="extraStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=microless_bh" class="store-card" style="border-color: rgba(249, 115, 22, 0.55);">
-                <div class="store-icon" style="background:#EA580C; color:#FFFFFF;">Microless</div>
-                <div class="store-name">ميكروليس البحرين</div>
-                <div class="store-meta" id="microlessStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=alershad_bh" class="store-card" style="border-color: rgba(180, 83, 9, 0.55);">
-                <div class="store-icon" style="background:#92400E; color:#FFFFFF;">AlErshad</div>
-                <div class="store-name">الإرشاد البحرين</div>
-                <div class="store-meta" id="alershadStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=ramez_bh" class="store-card" style="border-color: rgba(220, 38, 38, 0.55);">
-                <div class="store-icon" style="background:#B91C1C; color:#FFFFFF;">Ramez</div>
-                <div class="store-name">رامز البحرين</div>
-                <div class="store-meta" id="ramezStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=hypermax_bh" class="store-card" style="border-color: rgba(239, 68, 68, 0.55);">
-                <div class="store-icon" style="background:#DC2626; color:#FFFFFF;">HyperMax</div>
-                <div class="store-name">هايبرماكس البحرين</div>
-                <div class="store-meta" id="hypermaxStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=ansar_bh" class="store-card" style="border-color: rgba(236, 72, 153, 0.55);">
-                <div class="store-icon" style="background:#DB2777; color:#FFFFFF;">Ansar</div>
-                <div class="store-name">أنصار جاليري البحرين</div>
-                <div class="store-meta" id="ansarStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=zain_bh" class="store-card" style="border-color: rgba(168, 85, 247, 0.5);">
-                <div class="store-icon" style="background:#7E22CE; color:#FFFFFF;">zain</div>
-                <div class="store-name">زين البحرين</div>
-                <div class="store-meta" id="zainStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=stc_bh" class="store-card" style="border-color: rgba(192, 38, 211, 0.55);">
-                <div class="store-icon" style="background:#4F008C; color:#FFFFFF;">stc</div>
-                <div class="store-name">stc البحرين</div>
-                <div class="store-meta" id="stcStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=batelco_bh" class="store-card" style="border-color: rgba(225, 29, 72, 0.55);">
-                <div class="store-icon" style="background:#E11D48; color:#FFFFFF;">Batelco</div>
-                <div class="store-name">باتلكو البحرين</div>
-                <div class="store-meta" id="batelcoStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=virgin_bh" class="store-card" style="border-color: rgba(239, 68, 68, 0.55);">
-                <div class="store-icon" style="background:#B91C1C; color:#FFFFFF;">Virgin</div>
-                <div class="store-name">فيرجن ميجاستور</div>
-                <div class="store-meta" id="virginStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=jarir_bh" class="store-card" style="border-color: rgba(220, 38, 38, 0.55);">
-                <div class="store-icon" style="background:#DC2626; color:#FFFFFF;">جرير</div>
-                <div class="store-name">مكتبة جرير البحرين</div>
-                <div class="store-meta" id="jarirStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=sharafdg_bh" class="store-card" style="border-color: rgba(245, 158, 11, 0.55);">
-                <div class="store-icon" style="background:#D97706; color:#FFFFFF;">SDG</div>
-                <div class="store-name">شرف DG البحرين</div>
-                <div class="store-meta" id="sharafdgStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=ourshopee_bh" class="store-card" style="border-color: rgba(124, 58, 237, 0.55);">
-                <div class="store-icon" style="background:#6D28D9; color:#FFFFFF;">OurShopee</div>
-                <div class="store-name">أور شوبي البحرين</div>
-                <div class="store-meta" id="ourshopeeStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=advancedpc_bh" class="store-card" style="border-color: rgba(37, 99, 235, 0.55);">
-                <div class="store-icon" style="background:#1E40AF; color:#FFFFFF;">AdvPC</div>
-                <div class="store-name">أدفانسد بي سي البحرين</div>
-                <div class="store-meta" id="advancedpcStoreMeta">شغال الحين • BHD</div>
-            </a>
-            <a href="/deals?store=lulu_bh" class="store-card" style="border-color: rgba(22, 163, 74, 0.55);">
-                <div class="store-icon" style="background:#15803D; color:#FFFFFF;">LuLu</div>
-                <div class="store-name">لولو هايبرماركت البحرين</div>
-                <div class="store-meta" id="luluStoreMeta">شغال الحين • BHD</div>
-            </a>
+        <div class="stores-strip" id="homeStoresStrip">
+            {stores_cards_html}
         </div>
     </section>
 
-    <section>
+    <section class="strip-wrap">
         <div class="sec-head">
             <div>
                 <h2 class="sec-title">📂 الأقسام</h2>
-                <div class="sec-sub">اختر القسم وشوف الصيدات اللي فيه</div>
+                <div class="sec-sub">قلّب في شريط الأقسام وافتح القسم اللي تبيه بنقرة واحدة</div>
             </div>
-            <a href="/categories" class="btn-outline">كل الأقسام ←</a>
+            <div class="sec-head-actions">
+                <div class="strip-controls">
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', 1)" aria-label="التالي">→</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', -1)" aria-label="السابق">←</button>
+                </div>
+                <a href="/categories" class="btn-outline">كل الأقسام ←</a>
+            </div>
         </div>
-        <div class="cats-grid" id="homeCatsGrid"></div>
+        <div class="cats-strip" id="homeCatsGrid"></div>
     </section>
 
     <section style="margin-bottom: 38px;">
@@ -2130,33 +2500,21 @@ def page_home(request: Request):
 
     script = """
     <script>
+        enableDragScroll('homeStoresStrip');
+        enableDragScroll('homeCatsGrid');
+
         function bindStoreMeta(sum) {
             const st = sum.stores || {};
-            const mapping = {
-                noon_bh: 'noonStoreMeta',
-                extra_bh: 'extraStoreMeta',
-                microless_bh: 'microlessStoreMeta',
-                alershad_bh: 'alershadStoreMeta',
-                ramez_bh: 'ramezStoreMeta',
-                hypermax_bh: 'hypermaxStoreMeta',
-                ansar_bh: 'ansarStoreMeta',
-                zain_bh: 'zainStoreMeta',
-                stc_bh: 'stcStoreMeta',
-                batelco_bh: 'batelcoStoreMeta',
-                virgin_bh: 'virginStoreMeta',
-                jarir_bh: 'jarirStoreMeta',
-                ourshopee_bh: 'ourshopeeStoreMeta',
-                advancedpc_bh: 'advancedpcStoreMeta',
-                lulu_bh: 'luluStoreMeta'
-            };
-            Object.keys(mapping).forEach(k => {
-                if (st[k]) {
-                    document.getElementById(mapping[k]).textContent = `${st[k].count} منتج • خصم لحد ${st[k].max_discount}%`;
+            Object.keys(st).forEach(k => {
+                const el = document.getElementById('homeMeta_' + k);
+                if (el) {
+                    el.textContent = `${st[k].count} منتج • خصم لحد ${st[k].max_discount}%`;
                 }
             });
             const sdg = st.sharafdg_bh || st.sharaf_bh;
-            if (sdg) {
-                document.getElementById('sharafdgStoreMeta').textContent = `${sdg.count} منتج • خصم لحد ${sdg.max_discount}%`;
+            const sdgEl = document.getElementById('homeMeta_sharafdg_bh');
+            if (sdg && sdgEl) {
+                sdgEl.textContent = `${sdg.count} منتج • خصم لحد ${sdg.max_discount}%`;
             }
         }
 
@@ -2171,16 +2529,16 @@ def page_home(request: Request):
                 bindStoreMeta(sum);
 
                 const catsGrid = document.getElementById('homeCatsGrid');
-                catsGrid.innerHTML = sum.categories.slice(0, 8).map(c => `
+                catsGrid.innerHTML = sum.categories.map(c => `
                     <a href="/deals?category=${encodeURIComponent(c.name)}" class="cat-card">
-                        <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:12px; min-width:0;">
                             <div class="cat-badge-icon">🎯</div>
-                            <div>
-                                <div style="font-weight:800; font-size:0.95rem;">${escapeHtml(c.name)}</div>
+                            <div style="min-width:0;">
+                                <div style="font-weight:800; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.name)}</div>
                                 <div style="font-size:0.78rem; color:var(--text-secondary);">${c.count} منتج • خصم لحد ${c.max_discount}%</div>
                             </div>
                         </div>
-                        <span style="color:var(--text-muted);">←</span>
+                        <span class="cat-arrow">←</span>
                     </a>
                 `).join('');
 
@@ -2354,25 +2712,30 @@ def page_categories(request: Request):
     <div class="sec-head">
         <div>
             <h1 class="sec-title">📂 الأقسام</h1>
-            <div class="sec-sub">اختر القسم وشوف العروض وتاريخ الأسعار فيه</div>
+            <div class="sec-sub">اسحب يمين ويسار في شريط الأقسام أو اختر القسم مباشرة</div>
+        </div>
+        <div class="strip-controls">
+            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allCatsGrid', 1)" aria-label="التالي">→</button>
+            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allCatsGrid', -1)" aria-label="السابق">←</button>
         </div>
     </div>
-    <div class="cats-grid" id="allCatsGrid"></div>
+    <div class="cats-strip" id="allCatsGrid"></div>
     """
     script = """
     <script>
+        enableDragScroll('allCatsGrid');
         fetch('/api/summary').then(r => r.json()).then(data => {
             const grid = document.getElementById('allCatsGrid');
             grid.innerHTML = data.categories.map(c => `
                 <a href="/deals?category=${encodeURIComponent(c.name)}" class="cat-card">
-                    <div style="display:flex; align-items:center; gap:14px;">
+                    <div style="display:flex; align-items:center; gap:14px; min-width:0;">
                         <div class="cat-badge-icon">🎯</div>
-                        <div>
-                            <div style="font-weight:800; font-size:1rem;">${escapeHtml(c.name)}</div>
+                        <div style="min-width:0;">
+                            <div style="font-weight:800; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.name)}</div>
                             <div style="font-size:0.8rem; color:var(--text-secondary);">${c.count} منتج • خصم لحد ${c.max_discount}%</div>
                         </div>
                     </div>
-                    <span style="font-weight:900; color:var(--bh-red-bright);">←</span>
+                    <span class="cat-arrow">←</span>
                 </a>
             `).join('');
         });
@@ -2384,141 +2747,57 @@ def page_categories(request: Request):
 @app.get("/stores", response_class=HTMLResponse)
 def page_stores(request: Request):
     user = get_current_user(request)
-    body = """
+    store_order = [
+        "noon_bh", "extra_bh", "microless_bh", "alershad_bh",
+        "ramez_bh", "hypermax_bh", "ansar_bh", "zain_bh",
+        "stc_bh", "batelco_bh", "virgin_bh", "jarir_bh",
+        "sharafdg_bh", "ourshopee_bh", "advancedpc_bh", "lulu_bh"
+    ]
+    cards = []
+    for k in store_order:
+        meta = STORE_META[k]
+        cards.append(f"""
+            <a href="/deals?store={k}" class="store-card" style="border-color: rgba(255, 255, 255, 0.14);">
+                <div class="store-icon-box">
+                    <img src="{meta['logo']}" alt="{html.escape(meta['badge'])}" class="store-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    <span class="store-fallback-badge" style="display:none; background:{meta['accent']}; color:{'#111827' if meta['text_dark'] else '#FFFFFF'};">{html.escape(meta['badge'])}</span>
+                </div>
+                <div class="store-name">{html.escape(meta['label'])}</div>
+                <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
+                <div class="store-meta" id="pageStoreMeta_{k}">شغال الحين</div>
+            </a>
+        """)
+    body = f"""
     <div class="sec-head">
         <div>
             <h1 class="sec-title">🏬 المتاجر في البحرين 🇧🇭</h1>
-            <div class="sec-sub">المتاجر اللي نتابع أسعارها ونطلعلك صيداتها</div>
+            <div class="sec-sub">قلّب في الشريط أو اضغط على المتجر لمشاهدة عروضه وتاريخ أسعاره</div>
+        </div>
+        <div class="strip-controls">
+            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allStoresStrip', 1)" aria-label="التالي">→</button>
+            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allStoresStrip', -1)" aria-label="السابق">←</button>
         </div>
     </div>
-    <div class="stores-grid">
-        <a href="/deals?store=noon_bh" class="store-card" style="border-color: rgba(250, 204, 21, 0.55);">
-            <div class="store-icon" style="background:#FACC15; color:#111827;">noon</div>
-            <div class="store-name">نون البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeNoonStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=extra_bh" class="store-card" style="border-color: rgba(59, 130, 246, 0.55);">
-            <div class="store-icon" style="background:#1D4ED8; color:#FFFFFF;">eXtra</div>
-            <div class="store-name">إكسترا البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeExtraStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=microless_bh" class="store-card" style="border-color: rgba(249, 115, 22, 0.55);">
-            <div class="store-icon" style="background:#EA580C; color:#FFFFFF;">Microless</div>
-            <div class="store-name">ميكروليس البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeMicrolessStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=alershad_bh" class="store-card" style="border-color: rgba(180, 83, 9, 0.55);">
-            <div class="store-icon" style="background:#92400E; color:#FFFFFF;">AlErshad</div>
-            <div class="store-name">الإرشاد البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeAlershadStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=ramez_bh" class="store-card" style="border-color: rgba(220, 38, 38, 0.55);">
-            <div class="store-icon" style="background:#B91C1C; color:#FFFFFF;">Ramez</div>
-            <div class="store-name">رامز البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeRamezStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=hypermax_bh" class="store-card" style="border-color: rgba(239, 68, 68, 0.55);">
-            <div class="store-icon" style="background:#DC2626; color:#FFFFFF;">HyperMax</div>
-            <div class="store-name">هايبرماكس البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeHypermaxStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=ansar_bh" class="store-card" style="border-color: rgba(236, 72, 153, 0.55);">
-            <div class="store-icon" style="background:#DB2777; color:#FFFFFF;">Ansar</div>
-            <div class="store-name">أنصار جاليري البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeAnsarStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=zain_bh" class="store-card" style="border-color: rgba(168, 85, 247, 0.55);">
-            <div class="store-icon" style="background:#7E22CE; color:#FFFFFF;">zain</div>
-            <div class="store-name">زين البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeZainStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=stc_bh" class="store-card" style="border-color: rgba(192, 38, 211, 0.55);">
-            <div class="store-icon" style="background:#4F008C; color:#FFFFFF;">stc</div>
-            <div class="store-name">stc البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeStcStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=batelco_bh" class="store-card" style="border-color: rgba(225, 29, 72, 0.55);">
-            <div class="store-icon" style="background:#E11D48; color:#FFFFFF;">Batelco</div>
-            <div class="store-name">باتلكو البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeBatelcoStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=virgin_bh" class="store-card" style="border-color: rgba(239, 68, 68, 0.55);">
-            <div class="store-icon" style="background:#B91C1C; color:#FFFFFF;">Virgin</div>
-            <div class="store-name">فيرجن ميجاستور البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeVirginStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=jarir_bh" class="store-card" style="border-color: rgba(220, 38, 38, 0.55);">
-            <div class="store-icon" style="background:#DC2626; color:#FFFFFF;">جرير</div>
-            <div class="store-name">مكتبة جرير البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeJarirStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=sharafdg_bh" class="store-card" style="border-color: rgba(245, 158, 11, 0.55);">
-            <div class="store-icon" style="background:#D97706; color:#FFFFFF;">SDG</div>
-            <div class="store-name">شرف DG البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeSharafdgStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=ourshopee_bh" class="store-card" style="border-color: rgba(124, 58, 237, 0.55);">
-            <div class="store-icon" style="background:#6D28D9; color:#FFFFFF;">OurShopee</div>
-            <div class="store-name">أور شوبي البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeOurshopeeStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=advancedpc_bh" class="store-card" style="border-color: rgba(37, 99, 235, 0.55);">
-            <div class="store-icon" style="background:#1E40AF; color:#FFFFFF;">AdvPC</div>
-            <div class="store-name">أدفانسد بي سي البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeAdvancedpcStats">شغال الحين</div>
-        </a>
-        <a href="/deals?store=lulu_bh" class="store-card" style="border-color: rgba(22, 163, 74, 0.55);">
-            <div class="store-icon" style="background:#15803D; color:#FFFFFF;">LuLu</div>
-            <div class="store-name">لولو هايبرماركت البحرين</div>
-            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">BH البحرين • عملة BHD</div>
-            <div class="store-meta" id="storeLuluStats">شغال الحين</div>
-        </a>
+    <div class="stores-strip" id="allStoresStrip">
+        {"".join(cards)}
     </div>
     """
     script = """
     <script>
+        enableDragScroll('allStoresStrip');
         fetch('/api/summary').then(r => r.json()).then(d => {
             const st = d.stores || {};
-            const ids = {
-                noon_bh: 'storeNoonStats',
-                extra_bh: 'storeExtraStats',
-                microless_bh: 'storeMicrolessStats',
-                alershad_bh: 'storeAlershadStats',
-                ramez_bh: 'storeRamezStats',
-                hypermax_bh: 'storeHypermaxStats',
-                ansar_bh: 'storeAnsarStats',
-                zain_bh: 'storeZainStats',
-                stc_bh: 'storeStcStats',
-                batelco_bh: 'storeBatelcoStats',
-                virgin_bh: 'storeVirginStats',
-                jarir_bh: 'storeJarirStats',
-                ourshopee_bh: 'storeOurshopeeStats',
-                advancedpc_bh: 'storeAdvancedpcStats',
-                lulu_bh: 'storeLuluStats'
-            };
-            Object.keys(ids).forEach(k => {
-                if (st[k]) {
-                    document.getElementById(ids[k]).textContent = `${st[k].count} منتج • خصومات لحد ${st[k].max_discount}%`;
+            Object.keys(st).forEach(k => {
+                const el = document.getElementById('pageStoreMeta_' + k);
+                if (el) {
+                    el.textContent = `${st[k].count} منتج • خصومات لحد ${st[k].max_discount}%`;
                 }
             });
             const sdg = st.sharafdg_bh || st.sharaf_bh;
-            if (sdg) {
-                document.getElementById('storeSharafdgStats').textContent = `${sdg.count} منتج • خصومات لحد ${sdg.max_discount}%`;
+            const sdgEl = document.getElementById('pageStoreMeta_sharafdg_bh');
+            if (sdg && sdgEl) {
+                sdgEl.textContent = `${sdg.count} منتج • خصومات لحد ${sdg.max_discount}%`;
             }
         });
     </script>
@@ -2545,7 +2824,16 @@ def page_wishlist(request: Request):
         conn.close()
 
     if not saved_items:
-        cards_html = '<p style="color:var(--text-secondary);">ما حفظت أي منتج في المفضلة بعد.</p>'
+        cards_html = """
+            <div class="wishlist-empty" style="grid-column: 1 / -1;">
+                <div style="font-size:2.2rem; margin-bottom:10px;">⭐</div>
+                <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:8px;">قائمة المفضلة فاضية الحين</h2>
+                <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
+                    احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
+                </p>
+                <a href="/deals" class="btn-primary">🔥 استكشف العروض الحين</a>
+            </div>
+        """
     else:
         parts = []
         for it in saved_items:
@@ -2554,11 +2842,18 @@ def page_wishlist(request: Request):
             d_price = html.escape(str(it.get("price") or ""))
             d_url = html.escape(apply_affiliate(str(it.get("url") or "#")))
             parts.append(f"""
-                <article class="deal-card">
-                    <div class="deal-body">
-                        <div class="deal-cat">⭐ محفوظ في مفضلتك</div>
-                        <h3 class="deal-title">{d_title}</h3>
-                        <div class="price-row"><span class="price-now">{d_price}</span></div>
+                <article class="wishlist-card">
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="wishlist-top-row">
+                            <span class="wishlist-badge">⭐ محفوظ في المفضلة</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">BHD</span>
+                        </div>
+                        <h3 class="deal-title" title="{d_title}">{d_title}</h3>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="price-row" style="background:var(--bg-input); padding:10px 12px; border-radius:12px; border:1px solid var(--border-color);">
+                            <span class="price-now">{d_price}</span>
+                        </div>
                         <div class="card-actions" style="grid-template-columns: 1fr auto;">
                             <a href="{d_url}" target="_blank" rel="noopener" class="btn-buy">روح للعرض ↗</a>
                             <button type="button" class="btn-hist btn-save saved" onclick="removeSavedItem(this, '{d_key}')">إزالة</button>
@@ -2568,14 +2863,21 @@ def page_wishlist(request: Request):
             """)
         cards_html = "".join(parts)
 
+    safe_user_name = html.escape(str(user.get("name") or ""))
     body = f"""
-    <div class="sec-head">
+    <section class="wishlist-banner">
         <div>
-            <h1 class="sec-title">⭐ المفضلة</h1>
-            <div class="sec-sub">المنتجات اللي حفظتها للمتابعة</div>
+            <div class="hero-badge" style="margin-bottom:8px;">⭐ قائمة المتابعة الخاصة بك</div>
+            <h1 class="sec-title" style="font-size:1.55rem;">عروضي المفضلة {f"— {safe_user_name}" if safe_user_name else ""}</h1>
+            <div class="sec-sub">كل المنتجات اللي حفظتها في مكان واحد منظم لمتابعة السعر والانتقال المباشر للمتجر</div>
         </div>
-        <a href="/deals" class="btn-outline">رجوع للعروض ←</a>
-    </div>
+        <div class="sec-head-actions">
+            <span class="tag-pill" id="wishlistCountPill">{len(saved_items)} منتج محفوظ</span>
+            <a href="/deals" class="btn-primary">⚡ أضف عروض جديدة</a>
+            <a href="/logout" class="btn-outline">تسجيل الخروج</a>
+        </div>
+    </section>
+
     <div class="products-grid" id="wishlistGrid">{cards_html}</div>
     """
     script = """
@@ -2588,8 +2890,23 @@ def page_wishlist(request: Request):
             });
             const data = await res.json();
             if (data.ok && !data.saved) {
-                const card = btn.closest('.deal-card');
+                const card = btn.closest('.wishlist-card');
                 if (card) card.remove();
+                const remaining = document.querySelectorAll('#wishlistGrid .wishlist-card').length;
+                const pill = document.getElementById('wishlistCountPill');
+                if (pill) pill.textContent = `${remaining} منتج محفوظ`;
+                if (remaining === 0) {
+                    document.getElementById('wishlistGrid').innerHTML = `
+                        <div class="wishlist-empty" style="grid-column: 1 / -1;">
+                            <div style="font-size:2.2rem; margin-bottom:10px;">⭐</div>
+                            <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:8px;">قائمة المفضلة فاضية الحين</h2>
+                            <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
+                                احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
+                            </p>
+                            <a href="/deals" class="btn-primary">🔥 استكشف العروض الحين</a>
+                        </div>
+                    `;
+                }
             }
         }
     </script>
@@ -2615,7 +2932,10 @@ def page_coupons(request: Request):
         <div class="coupon-card">
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:42px; height:42px; border-radius:12px; background:#FACC15; color:#111; font-weight:900; display:flex; align-items:center; justify-content:center;">noon</div>
+                    <div class="store-icon-box" style="width:46px; height:46px; margin:0; padding:5px;">
+                        <img src="/static/noon_bh.png" alt="noon" class="store-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <span class="store-fallback-badge" style="display:none; background:#FACC15; color:#111;">noon</span>
+                    </div>
                     <div>
                         <div style="font-weight:800;">كوبون نون البحرين</div>
                         <div style="font-size:0.78rem; color:var(--text-secondary);">كود قابل للتحديث</div>
@@ -2634,7 +2954,7 @@ def page_coupons(request: Request):
         </div>
     </div>
 
-    <div style="background:linear-gradient(135deg, #0088cc, #0284c7); color:#fff; border-radius:20px; padding:24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+    <div style="background:linear-gradient(135deg, #0088cc, #0284c7); color:#fff; border-radius:20px; padding:24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; box-shadow:var(--shadow-card);">
         <div>
             <h3 style="font-size:1.2rem; font-weight:900; margin-bottom:4px;">✈️ دش قناة صيدة على تيليجرام — لا يفوتك!</h3>
             <p style="font-size:0.9rem; opacity:0.92;">أي صيدة قوية أو كود يديد ينزل على القناة أول بأول قبل لا يخلص.</p>
