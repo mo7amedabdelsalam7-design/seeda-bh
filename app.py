@@ -1,6 +1,8 @@
 import html
 import os
+import struct
 import time
+import zlib
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Optional
@@ -20,6 +22,15 @@ STATIC_DIR = BASE_DIR / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 MICROLESS_IMAGES_DIR = STATIC_DIR / "images" / "microless"
 MICROLESS_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+AIVI_IMAGE_PATH = STATIC_DIR / "aivi_bh.png"
+SOKO_IMAGE_PATH = STATIC_DIR / "soko_bh.png"
+TALABAT_MART_IMAGE_PATH = STATIC_DIR / "talabat_mart_bh.png"
+FLORMAR_IMAGE_PATH = STATIC_DIR / "flormar_bh.png"
+NINJA_IMAGE_PATH = STATIC_DIR / "ninja_bh.png"
+ASQ_IMAGE_PATH = STATIC_DIR / "asq_bh.png"
+ALMAJED_IMAGE_PATH = STATIC_DIR / "almajed4oud_bh.png"
+BBW_IMAGE_PATH = STATIC_DIR / "bbw_bh.png"
+MINISO_IMAGE_PATH = STATIC_DIR / "miniso_bh.png"
 
 AFFILIATE_PARAM = "utm_source"
 AFFILIATE_CODE = ""
@@ -30,7 +41,13 @@ ALLOWED_PROXY_HOSTS = {
     "www.bahrain.microless.com",
     "bahrain.alershadonline.com",
     "www.bahrain.alershadonline.com",
+    "bh.alnasser.net",
+    "www.bh.alnasser.net",
+    "randbfashion.com",
+    "www.randbfashion.com",
     "cdn.shopify.com",
+    "albayanperfumes.com",
+    "www.albayanperfumes.com",
     "advancedpcbahrain.com",
     "www.advancedpcbahrain.com",
     "gcc.luluhypermarket.com",
@@ -49,13 +66,50 @@ ALLOWED_PROXY_HOSTS = {
     "ansargallery.bh",
     "www.ansargallery.bh",
     "media.ansargallery.bh",
+    "baraka-sports.com",
+    "www.baraka-sports.com",
+    "namshi.com",
+    "www.namshi.com",
+    "nooncdn.com",
+    "aivi.com",
+    "www.aivi.com",
+    "ar-bh.aivi.com",
+    "en-bh.aivi.com",
+    "sokostore.com",
+    "www.sokostore.com",
+    "talabat.com",
+    "www.talabat.com",
+    "talabat.dhmedia.io",
+    "flormarbh.com",
+    "www.flormarbh.com",
+    "ananinja.com",
+    "www.ananinja.com",
+    "img.ananinja.com",
+    "abdulsamadalqurashi.com",
+    "www.abdulsamadalqurashi.com",
+    "bh.abdulsamadalqurashi.com",
+    "bh.almajed4oud.com",
+    "almajed4oud.com",
+    "www.almajed4oud.com",
+    "cdn.salla.sa",
+    "media.salla.sa",
+    "bathandbodyworks.com.bh",
+    "www.bathandbodyworks.com.bh",
+    "media.alshaya.com",
+    "miniso-bh.com",
+    "www.miniso-bh.com",
 }
 
 STORE_META = {
     "noon_bh": {"label": "نون البحرين", "badge": "noon", "decimals": 2, "logo": "/static/noon_bh.png", "accent": "#FACC15", "text_dark": True},
+    "namshi_bh": {"label": "نمشي البحرين", "badge": "Namshi", "decimals": 2, "logo": "/static/namshi_bh.png", "accent": "#111827", "text_dark": False},
     "extra_bh": {"label": "إكسترا البحرين", "badge": "eXtra", "decimals": 3, "logo": "/static/extra_bh.png", "accent": "#1D4ED8", "text_dark": False},
     "microless_bh": {"label": "ميكروليس البحرين", "badge": "Microless", "decimals": 3, "logo": "/static/microless_bh.png", "accent": "#EA580C", "text_dark": False},
     "alershad_bh": {"label": "الإرشاد البحرين", "badge": "AlErshad", "decimals": 3, "logo": "/static/alershad_bh.png", "accent": "#92400E", "text_dark": False},
+    "alnasser_bh": {"label": "النصر البحرين", "badge": "AlNasser", "decimals": 3, "logo": "/static/alnasser_bh.png", "accent": "#B91C1C", "text_dark": False},
+    "randb_bh": {"label": "آر أند بي البحرين", "badge": "R&B", "decimals": 3, "logo": "/static/randb_bh.png", "accent": "#111827", "text_dark": False},
+    "max_bh": {"label": "ماكس البحرين", "badge": "MAX", "decimals": 3, "logo": "/static/max_bh.png", "accent": "#DC2626", "text_dark": False},
+    "splash_bh": {"label": "سبلاش البحرين", "badge": "Splash", "decimals": 3, "logo": "/static/splash_bh.png", "accent": "#E11D48", "text_dark": False},
     "ramez_bh": {"label": "رامز البحرين", "badge": "Ramez", "decimals": 3, "logo": "/static/ramez_bh.png", "accent": "#B91C1C", "text_dark": False},
     "hypermax_bh": {"label": "هايبرماكس البحرين", "badge": "HyperMax", "decimals": 3, "logo": "/static/hypermax_bh.png", "accent": "#DC2626", "text_dark": False},
     "zain_bh": {"label": "زين البحرين", "badge": "zain", "decimals": 3, "logo": "/static/zain_bh.png", "accent": "#7E22CE", "text_dark": False},
@@ -69,7 +123,125 @@ STORE_META = {
     "advancedpc_bh": {"label": "أدفانسد بي سي البحرين", "badge": "AdvPC", "decimals": 3, "logo": "/static/advancedpc_bh.png", "accent": "#1E40AF", "text_dark": False},
     "lulu_bh": {"label": "لولو هايبرماركت البحرين", "badge": "LuLu", "decimals": 3, "logo": "/static/lulu_bh.png", "accent": "#15803D", "text_dark": False},
     "ansar_bh": {"label": "أنصار جاليري البحرين", "badge": "Ansar", "decimals": 3, "logo": "/static/ansar_bh.png", "accent": "#DB2777", "text_dark": False},
+    "baraka_bh": {"label": "البركة للرياضة البحرين", "badge": "Baraka", "decimals": 3, "logo": "/static/albaraka_bh.png", "accent": "#0F766E", "text_dark": False},
+    "albayan_bh": {"label": "البيان البحرين", "badge": "AlBayan", "decimals": 3, "logo": "/static/Albayan_bh.png", "accent": "#991B1B", "text_dark": False},
+    "ishop_bh": {"label": "آي شوب البحرين", "badge": "iShop", "decimals": 3, "logo": "/static/ishop_bh.png", "accent": "#0F172A", "text_dark": False},
+    "aivi_bh": {"label": "أيفي البحرين", "badge": "AIVI", "decimals": 3, "logo": "/static/aivi_bh.png", "accent": "#111827", "text_dark": False},
+    "soko_bh": {"label": "سوكو البحرين", "badge": "SOKO", "decimals": 3, "logo": "/static/soko_bh.png", "accent": "#2563EB", "text_dark": False},
+    "talabat_mart_bh": {"label": "طلبات مارت البحرين", "badge": "Mart", "decimals": 3, "logo": "/static/talabat_mart_bh.png", "accent": "#FF5A00", "text_dark": False},
+    "flormar_bh": {"label": "فلورمار البحرين", "badge": "Flormar", "decimals": 3, "logo": "/static/flormar_bh.png", "accent": "#E11D48", "text_dark": False},
+    "ninja_bh": {"label": "نينجا البحرين", "badge": "Ninja", "decimals": 3, "logo": "/static/ninja_bh.png", "accent": "#7C3AED", "text_dark": False},
+    "asq_bh": {"label": "عبد الصمد القرشي البحرين", "badge": "ASQ", "decimals": 3, "logo": "/static/asq_bh.png", "accent": "#78350F", "text_dark": False},
+    "almajed4oud_bh": {"label": "الماجد للعود البحرين", "badge": "Almajed", "decimals": 3, "logo": "/static/almajed4oud_bh.png", "accent": "#7C2D12", "text_dark": False},
+    "bbw_bh": {"label": "باث آند بودي وركس البحرين", "badge": "BBW", "decimals": 3, "logo": "/static/bbw_bh.png", "accent": "#1D4ED8", "text_dark": False},
+    "miniso_bh": {"label": "مينيسو البحرين", "badge": "MINISO", "decimals": 3, "logo": "/static/miniso_bh.png", "accent": "#E11D2E", "text_dark": False},
 }
+
+
+def _create_png_bytes(width: int = 128, height: int = 128, bg_rgb: tuple[int, int, int] = (17, 24, 39), accent_rgb: tuple[int, int, int] = (255, 42, 68)) -> bytes:
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        crc = zlib.crc32(tag + data) & 0xFFFFFFFF
+        return struct.pack("!I", len(data)) + tag + data + struct.pack("!I", crc)
+
+    raw_rows = bytearray()
+    cx, cy = width / 2.0, height / 2.0
+    max_r = min(width, height) * 0.34
+    for y in range(height):
+        raw_rows.append(0)
+        for x in range(width):
+            dx = x - cx
+            dy = y - cy
+            dist = (dx * dx + dy * dy) ** 0.5
+            if dist <= max_r:
+                r, g, b = accent_rgb
+            else:
+                r, g, b = bg_rgb
+            raw_rows.extend((r, g, b))
+
+    ihdr = struct.pack("!IIBBBBB", width, height, 8, 2, 0, 0, 0)
+    idat = zlib.compress(bytes(raw_rows), level=6)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", idat) + chunk(b"IEND", b"")
+
+
+def ensure_aivi_bh_image() -> None:
+    try:
+        if AIVI_IMAGE_PATH.exists() and AIVI_IMAGE_PATH.stat().st_size > 100:
+            return
+        AIVI_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (17, 24, 39), (225, 29, 72)))
+    except Exception:
+        pass
+
+
+def ensure_soko_bh_image() -> None:
+    try:
+        if SOKO_IMAGE_PATH.exists() and SOKO_IMAGE_PATH.stat().st_size > 100:
+            return
+        SOKO_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (15, 23, 42), (56, 189, 248)))
+    except Exception:
+        pass
+
+
+def ensure_talabat_mart_bh_image() -> None:
+    try:
+        if TALABAT_MART_IMAGE_PATH.exists() and TALABAT_MART_IMAGE_PATH.stat().st_size > 100:
+            return
+        TALABAT_MART_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (24, 24, 27), (255, 90, 0)))
+    except Exception:
+        pass
+
+
+def ensure_flormar_bh_image() -> None:
+    try:
+        if FLORMAR_IMAGE_PATH.exists() and FLORMAR_IMAGE_PATH.stat().st_size > 100:
+            return
+        FLORMAR_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (31, 16, 26), (225, 29, 72)))
+    except Exception:
+        pass
+
+
+def ensure_ninja_bh_image() -> None:
+    try:
+        if NINJA_IMAGE_PATH.exists() and NINJA_IMAGE_PATH.stat().st_size > 100:
+            return
+        NINJA_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (18, 16, 36), (124, 58, 237)))
+    except Exception:
+        pass
+
+
+def ensure_asq_bh_image() -> None:
+    try:
+        if ASQ_IMAGE_PATH.exists() and ASQ_IMAGE_PATH.stat().st_size > 100:
+            return
+        ASQ_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (38, 22, 12), (217, 119, 6)))
+    except Exception:
+        pass
+
+
+def ensure_almajed4oud_bh_image() -> None:
+    try:
+        if ALMAJED_IMAGE_PATH.exists() and ALMAJED_IMAGE_PATH.stat().st_size > 100:
+            return
+        ALMAJED_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (42, 18, 10), (180, 83, 9)))
+    except Exception:
+        pass
+
+
+def ensure_bbw_bh_image() -> None:
+    try:
+        if BBW_IMAGE_PATH.exists() and BBW_IMAGE_PATH.stat().st_size > 100:
+            return
+        BBW_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (29, 78, 216), (255, 255, 255)))
+    except Exception:
+        pass
+
+
+def ensure_miniso_bh_image() -> None:
+    try:
+        if MINISO_IMAGE_PATH.exists() and MINISO_IMAGE_PATH.stat().st_size > 100:
+            return
+        MINISO_IMAGE_PATH.write_bytes(_create_png_bytes(128, 128, (225, 29, 46), (255, 255, 255)))
+    except Exception:
+        pass
 
 
 def _sql(conn: Any, query: str) -> str:
@@ -186,6 +358,15 @@ def ensure_db_ready():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     MICROLESS_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+    ensure_aivi_bh_image()
+    ensure_soko_bh_image()
+    ensure_talabat_mart_bh_image()
+    ensure_flormar_bh_image()
+    ensure_ninja_bh_image()
+    ensure_asq_bh_image()
+    ensure_almajed4oud_bh_image()
+    ensure_bbw_bh_image()
+    ensure_miniso_bh_image()
     ensure_db_ready()
     yield
 
@@ -224,7 +405,7 @@ def get_user_saved_keys(user_id: Optional[int]) -> list[str]:
     conn = get_db()
     cur = conn.cursor()
     try:
-        cur.execute(_sql(conn, "SELECT deal_key FROM saved_deals WHERE user_id = ?"), (user_id,))
+        cur.execute(_sql(conn, "SELECT deal_key FROM saved_deals WHERE user_id = ?"), (int(user_id),))
         keys = [_row_to_dict(r).get("deal_key") for r in cur.fetchall()]
         return [str(k) for k in keys if k is not None]
     except Exception:
@@ -260,6 +441,42 @@ def resolve_local_product_image(sku: Any, store: Any) -> str:
                         return f"/static/images/microless/{safe_sku}{ext}"
         if (STATIC_DIR / "microless_bh.png").exists():
             return "/static/microless_bh.png"
+    elif store_str == "aivi_bh":
+        ensure_aivi_bh_image()
+        if AIVI_IMAGE_PATH.exists():
+            return "/static/aivi_bh.png"
+    elif store_str == "soko_bh":
+        ensure_soko_bh_image()
+        if SOKO_IMAGE_PATH.exists():
+            return "/static/soko_bh.png"
+    elif store_str == "talabat_mart_bh":
+        ensure_talabat_mart_bh_image()
+        if TALABAT_MART_IMAGE_PATH.exists():
+            return "/static/talabat_mart_bh.png"
+    elif store_str == "flormar_bh":
+        ensure_flormar_bh_image()
+        if FLORMAR_IMAGE_PATH.exists():
+            return "/static/flormar_bh.png"
+    elif store_str == "ninja_bh":
+        ensure_ninja_bh_image()
+        if NINJA_IMAGE_PATH.exists():
+            return "/static/ninja_bh.png"
+    elif store_str == "asq_bh":
+        ensure_asq_bh_image()
+        if ASQ_IMAGE_PATH.exists():
+            return "/static/asq_bh.png"
+    elif store_str == "almajed4oud_bh":
+        ensure_almajed4oud_bh_image()
+        if ALMAJED_IMAGE_PATH.exists():
+            return "/static/almajed4oud_bh.png"
+    elif store_str == "bbw_bh":
+        ensure_bbw_bh_image()
+        if BBW_IMAGE_PATH.exists():
+            return "/static/bbw_bh.png"
+    elif store_str == "miniso_bh":
+        ensure_miniso_bh_image()
+        if MINISO_IMAGE_PATH.exists():
+            return "/static/miniso_bh.png"
     return ""
 
 
@@ -281,7 +498,10 @@ def img_proxy(url: str = Query(..., min_length=5)):
         host not in ALLOWED_PROXY_HOSTS
         and not host.endswith(".microless.com")
         and not host.endswith(".alershadonline.com")
+        and not host.endswith(".alnasser.net")
+        and not host.endswith(".randbfashion.com")
         and not host.endswith(".shopify.com")
+        and not host.endswith(".albayanperfumes.com")
         and not host.endswith(".akinoncloudcdn.com")
         and not host.endswith(".ramezshopping.com")
         and not host.endswith(".hypermax.com.bh")
@@ -289,6 +509,21 @@ def img_proxy(url: str = Query(..., min_length=5)):
         and not host.endswith(".mafretailproxy.com")
         and not host.endswith(".amazonaws.com")
         and not host.endswith(".ansargallery.bh")
+        and not host.endswith(".baraka-sports.com")
+        and not host.endswith(".namshi.com")
+        and not host.endswith(".nooncdn.com")
+        and not host.endswith(".aivi.com")
+        and not host.endswith(".sokostore.com")
+        and not host.endswith(".talabat.com")
+        and not host.endswith(".dhmedia.io")
+        and not host.endswith(".flormarbh.com")
+        and not host.endswith(".ananinja.com")
+        and not host.endswith(".abdulsamadalqurashi.com")
+        and not host.endswith(".almajed4oud.com")
+        and not host.endswith(".salla.sa")
+        and not host.endswith(".bathandbodyworks.com.bh")
+        and not host.endswith(".alshaya.com")
+        and not host.endswith(".miniso-bh.com")
     ):
         return Response(status_code=403)
 
@@ -296,14 +531,42 @@ def img_proxy(url: str = Query(..., min_length=5)):
         referer = "https://bahrain.microless.com/"
     elif "alershadonline.com" in host:
         referer = "https://bahrain.alershadonline.com/"
+    elif "alnasser.net" in host:
+        referer = "https://bh.alnasser.net/"
+    elif "randbfashion.com" in host:
+        referer = "https://randbfashion.com/"
+    elif "albayanperfumes.com" in host:
+        referer = "https://albayanperfumes.com/"
     elif "ansargallery.bh" in host:
         referer = "https://www.ansargallery.bh/"
+    elif "baraka-sports.com" in host:
+        referer = "https://baraka-sports.com/"
     elif "hypermax.com.bh" in host or "mafrservices.com" in host or "mafretailproxy.com" in host:
         referer = "https://www.hypermax.com.bh/"
     elif "ramezshopping.com" in host or "amazonaws.com" in host:
         referer = "https://ramezshopping.com/"
     elif "akinoncloudcdn.com" in host or "luluhypermarket.com" in host:
         referer = "https://gcc.luluhypermarket.com/"
+    elif "namshi.com" in host or "nooncdn.com" in host:
+        referer = "https://www.namshi.com/"
+    elif "aivi.com" in host:
+        referer = "https://ar-bh.aivi.com/"
+    elif "sokostore.com" in host:
+        referer = "https://sokostore.com/"
+    elif "talabat.com" in host or "dhmedia.io" in host:
+        referer = "https://www.talabat.com/"
+    elif "flormarbh.com" in host or "shopify.com" in host:
+        referer = "https://flormarbh.com/"
+    elif "ananinja.com" in host:
+        referer = "https://ananinja.com/bh/ar"
+    elif "almajed4oud.com" in host:
+        referer = "https://bh.almajed4oud.com/"
+    elif "abdulsamadalqurashi.com" in host or "salla.sa" in host:
+        referer = "https://bh.abdulsamadalqurashi.com/"
+    elif "bathandbodyworks.com.bh" in host or "alshaya.com" in host:
+        referer = "https://www.bathandbodyworks.com.bh/"
+    elif "miniso-bh.com" in host:
+        referer = "https://miniso-bh.com/"
     else:
         referer = f"{parsed.scheme}://{host}/"
 
@@ -372,9 +635,17 @@ def serve_logo():
     return Response(status_code=404)
 
 
-# ===== API Endpoints =====
+def _store_where_clause(store: str) -> tuple[str, list[Any]]:
+    st_clean = (store or "").strip().lower()
+    if not st_clean:
+        return "", []
+    if st_clean == "sharafdg_bh":
+        return " AND LOWER(TRIM(COALESCE(store, ''))) IN ('sharafdg_bh', 'sharaf_bh')", []
+    return " AND LOWER(TRIM(COALESCE(store, ''))) = ?", [st_clean]
+
+
 @app.get("/api/summary")
-def api_summary():
+def api_summary(store: str = ""):
     conn = get_db()
     cur = conn.cursor()
 
@@ -398,19 +669,23 @@ def api_summary():
     stores_stats = {}
     for raw_r in cur.fetchall():
         r = _row_to_dict(raw_r)
-        st_key = r.get("store") or "noon_bh"
+        st_key = (r.get("store") or "noon_bh").strip()
         stores_stats[st_key] = {
             "count": int(r.get("cnt") or 0),
             "max_discount": round(float(r.get("max_disc") or 0), 1),
         }
 
-    cur.execute(_sql(conn, """
-        SELECT category, COUNT(*) AS cnt, COALESCE(MAX(discount_pct), 0) AS max_disc
-        FROM products
-        WHERE in_stock = 1 AND category IS NOT NULL AND category != ''
-        GROUP BY category
-        ORDER BY cnt DESC
-    """))
+    st_clause, st_params = _store_where_clause(store)
+    cur.execute(
+        _sql(conn, f"""
+            SELECT category, COUNT(*) AS cnt, COALESCE(MAX(discount_pct), 0) AS max_disc
+            FROM products
+            WHERE in_stock = 1 AND category IS NOT NULL AND category != ''{st_clause}
+            GROUP BY category
+            ORDER BY cnt DESC
+        """),
+        st_params,
+    )
     categories = []
     for raw_r in cur.fetchall():
         r = _row_to_dict(raw_r)
@@ -459,11 +734,12 @@ def api_products(
         where.append("category = ?")
         params.append(category.strip())
     if store.strip():
-        if store.strip() == "sharafdg_bh":
-            where.append("store IN ('sharafdg_bh', 'sharaf_bh')")
+        st_clean = store.strip().lower()
+        if st_clean == "sharafdg_bh":
+            where.append("LOWER(TRIM(COALESCE(store, ''))) IN ('sharafdg_bh', 'sharaf_bh')")
         else:
-            where.append("store = ?")
-            params.append(store.strip())
+            where.append("LOWER(TRIM(COALESCE(store, ''))) = ?")
+            params.append(st_clean)
     if real_only == 1:
         where.append("is_real_deal = 1")
     if min_discount > 0:
@@ -501,14 +777,32 @@ def api_products(
     items = []
     for raw_r in cur.fetchall():
         d = _row_to_dict(raw_r)
-        st_key = d.get("store") or ("ansar_bh" if str(d.get("sku") or "").startswith("ANSAR_") else "noon_bh")
+        st_key = (d.get("store") or ("ansar_bh" if str(d.get("sku") or "").startswith("ANSAR_") else "noon_bh")).strip()
         dec = STORE_META.get(st_key, {}).get("decimals", 2)
         d["store"] = st_key
         local_img = resolve_local_product_image(d.get("sku"), st_key)
-        if local_img:
+        if local_img and st_key == "microless_bh":
             d["image_url"] = local_img
         elif st_key == "microless_bh" and (STATIC_DIR / "microless_bh.png").exists():
             d["image_url"] = "/static/microless_bh.png"
+        elif st_key == "aivi_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/aivi_bh.png"
+        elif st_key == "soko_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/soko_bh.png"
+        elif st_key == "talabat_mart_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/talabat_mart_bh.png"
+        elif st_key == "flormar_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/flormar_bh.png"
+        elif st_key == "ninja_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/ninja_bh.png"
+        elif st_key == "asq_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/asq_bh.png"
+        elif st_key == "almajed4oud_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/almajed4oud_bh.png"
+        elif st_key == "bbw_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/bbw_bh.png"
+        elif st_key == "miniso_bh" and not (d.get("image_url") or "").strip():
+            d["image_url"] = "/static/miniso_bh.png"
         d["current_price"] = round(float(d.get("current_price") or 0), dec)
         d["old_price"] = round(float(d["old_price"]), dec) if d.get("old_price") is not None else None
         d["discount_pct"] = float(d.get("discount_pct") or 0)
@@ -539,10 +833,10 @@ def api_history(sku: str):
     prod = cur.fetchone()
     if not prod:
         conn.close()
-        return JSONResponse(status_code=404, content={"error": "المنتج مو موجود"})
+        return JSONResponse(status_code=404, content={"error": "هالمنتج مو موجود الحين"})
 
     prod_dict = _row_to_dict(prod)
-    st_key = prod_dict.get("store") or ("ansar_bh" if str(prod_dict.get("sku") or "").startswith("ANSAR_") else "noon_bh")
+    st_key = (prod_dict.get("store") or ("ansar_bh" if str(prod_dict.get("sku") or "").startswith("ANSAR_") else "noon_bh")).strip()
     dec = STORE_META.get(st_key, {}).get("decimals", 2)
 
     cur.execute(
@@ -656,7 +950,7 @@ def render_layout(
         if has_custom_logo
         else r"""
         <div class="bahrain-chili-mark" aria-hidden="true">
-            <svg viewBox="0 0 64 64" width="38" height="38">
+            <svg viewBox="0 0 64 64" width="46" height="46">
                 <defs>
                     <linearGradient id="bhRed" x1="0" y1="0" x2="1" y2="1">
                         <stop offset="0%" stop-color="#E11D38"/>
@@ -742,6 +1036,19 @@ def render_layout(
             50% {{ transform: translateY(-5px); }}
         }}
 
+        @keyframes seedaOrbDance {{
+            0% {{ transform: translateY(0px) rotate(0deg) scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 68, 0.45), 0 12px 28px rgba(255, 42, 68, 0.36); }}
+            25% {{ transform: translateY(-8px) rotate(8deg) scale(1.05); }}
+            50% {{ transform: translateY(0px) rotate(0deg) scale(1.09); box-shadow: 0 0 0 12px rgba(245, 158, 11, 0), 0 16px 32px rgba(255, 42, 68, 0.52); }}
+            75% {{ transform: translateY(-7px) rotate(-8deg) scale(1.05); }}
+            100% {{ transform: translateY(0px) rotate(0deg) scale(1); box-shadow: 0 0 0 0 rgba(255, 42, 68, 0), 0 12px 28px rgba(255, 42, 68, 0.36); }}
+        }}
+
+        @keyframes seedaOrbSpinRing {{
+            from {{ transform: rotate(0deg); }}
+            to {{ transform: rotate(360deg); }}
+        }}
+
         @keyframes fadeUp {{
             from {{ opacity: 0; transform: translateY(10px); }}
             to {{ opacity: 1; transform: translateY(0); }}
@@ -794,7 +1101,7 @@ def render_layout(
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            min-height: 72px;
+            min-height: 76px;
             flex-wrap: wrap;
             padding: 10px 0;
         }}
@@ -802,20 +1109,27 @@ def render_layout(
         .brand-link {{
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-shrink: 0;
             transition: var(--transition);
         }}
 
         .brand-link:hover {{
-            transform: translateY(-1px) scale(1.02);
+            transform: translateY(-1px) scale(1.03);
         }}
 
         .brand-logo-img {{
-            height: 40px;
+            height: 50px;
             width: auto;
-            border-radius: 11px;
+            max-width: 150px;
+            border-radius: 13px;
             object-fit: contain;
+            filter: drop-shadow(0 6px 14px rgba(255, 42, 68, 0.28));
+            transition: var(--transition);
+        }}
+
+        .brand-link:hover .brand-logo-img {{
+            transform: scale(1.06) rotate(-2deg);
         }}
 
         .bahrain-chili-mark {{
@@ -833,7 +1147,7 @@ def render_layout(
         }}
 
         .brand-title {{
-            font-size: 1.24rem;
+            font-size: 1.38rem;
             font-weight: 900;
             letter-spacing: -0.3px;
             display: flex;
@@ -848,9 +1162,66 @@ def render_layout(
         }}
 
         .brand-sub {{
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             color: var(--text-secondary);
             font-weight: 600;
+        }}
+
+        .seeda-animated-orb {{
+            position: relative;
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 42, 68, 0.24), rgba(245, 158, 11, 0.24));
+            border: 3px solid var(--bh-red-bright);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: seedaOrbDance 3.2s ease-in-out infinite;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+            flex-shrink: 0;
+        }}
+
+        .seeda-animated-orb::before {{
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 2.5px dashed rgba(255, 42, 68, 0.72);
+            animation: seedaOrbSpinRing 6s linear infinite;
+            pointer-events: none;
+        }}
+
+        .seeda-animated-orb:hover {{
+            animation-play-state: paused;
+            transform: scale(1.16) rotate(14deg);
+            border-color: #FBBF24;
+            box-shadow: 0 0 32px rgba(255, 42, 68, 0.78), 0 0 18px rgba(251, 191, 36, 0.6);
+        }}
+
+        .seeda-animated-orb:hover::before {{
+            animation-duration: 1.5s;
+            border-color: #FBBF24;
+        }}
+
+        .seeda-orb-img {{
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }}
+
+        .seeda-orb-svg {{
+            width: 72px;
+            height: 72px;
+            display: block;
+        }}
+
+        .seeda-animated-orb:hover .seeda-orb-img {{
+            transform: scale(1.06) rotate(-14deg);
         }}
 
         .nav-search {{
@@ -1017,7 +1388,7 @@ def render_layout(
 
         .hero-box {{
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             border-radius: 28px;
             background:
                 radial-gradient(circle at 85% 20%, rgba(255, 42, 68, 0.22), transparent 45%),
@@ -1114,20 +1485,41 @@ def render_layout(
         }}
 
         .hero-showcase {{
+            position: relative;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 22px;
-            padding: 20px;
+            padding: 22px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }}
 
+        .showcase-orb-banner {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: linear-gradient(135deg, rgba(255, 42, 68, 0.12), rgba(245, 158, 11, 0.08));
+            border: 1px solid rgba(255, 42, 68, 0.25);
+            border-radius: 18px;
+            padding: 14px 16px;
+        }}
+
+        .showcase-orb-info {{
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
+        }}
+
         .showcase-top {{
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }}
 
         .tag-pill {{
@@ -1221,7 +1613,6 @@ def render_layout(
             transform: translateY(-2px) scale(1.06);
         }}
 
-        /* شريط المتاجر الأفقي الموحد في الديسكتوب والموبايل */
         .stores-strip {{
             display: flex;
             flex-direction: row;
@@ -1249,6 +1640,19 @@ def render_layout(
         .stores-strip::-webkit-scrollbar-thumb {{
             background: rgba(255, 42, 68, 0.45);
             border-radius: 999px;
+        }}
+
+        .stores-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }}
+
+        .stores-grid .store-card {{
+            flex: none;
+            min-width: 0;
+            width: 100%;
         }}
 
         .store-card {{
@@ -1330,7 +1734,6 @@ def render_layout(
             font-weight: 700;
         }}
 
-        /* شريط الأقسام الأفقي الموحد في الديسكتوب والموبايل */
         .cats-strip {{
             display: flex;
             flex-direction: row;
@@ -1358,6 +1761,19 @@ def render_layout(
         .cats-strip::-webkit-scrollbar-thumb {{
             background: rgba(255, 42, 68, 0.45);
             border-radius: 999px;
+        }}
+
+        .categories-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }}
+
+        .categories-grid .cat-card {{
+            flex: none;
+            min-width: 0;
+            width: 100%;
         }}
 
         .cat-card {{
@@ -1412,6 +1828,40 @@ def render_layout(
 
         .cat-card:hover .cat-arrow {{
             transform: translateX(-4px);
+        }}
+
+        .directory-search-box {{
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }}
+
+        .directory-search-box:focus-within {{
+            border-color: var(--bh-red-bright);
+            box-shadow: 0 0 0 4px var(--bh-red-soft);
+        }}
+
+        .directory-search-box input {{
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            outline: none;
+        }}
+
+        .directory-search-box input:focus {{
+            border-color: var(--bh-red-bright);
         }}
 
         .products-grid {{
@@ -1478,6 +1928,18 @@ def render_layout(
             padding: 3px 9px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(206, 17, 38, 0.35);
+            width: fit-content;
+        }}
+
+        .badge-promo {{
+            background: linear-gradient(135deg, #D97706, #F59E0B);
+            color: #111827;
+            font-weight: 900;
+            font-size: 0.74rem;
+            padding: 3px 9px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+            width: fit-content;
         }}
 
         .badge-real {{
@@ -1487,6 +1949,7 @@ def render_layout(
             font-size: 0.74rem;
             padding: 3px 9px;
             border-radius: 8px;
+            width: fit-content;
         }}
 
         .badge-store {{
@@ -1602,7 +2065,6 @@ def render_layout(
             color: #10B981;
         }}
 
-        /* صفحة المفضلة العصرية المتناسقة مع هوية صيدة */
         .wishlist-banner {{
             background:
                 radial-gradient(circle at 15% 20%, rgba(255, 42, 68, 0.2), transparent 45%),
@@ -1897,7 +2359,7 @@ def render_layout(
 
         @media (max-width: 600px) {{
             .container {{
-                padding: 0 12px;
+                padding: 0 10px;
             }}
             .navbar-inner {{
                 min-height: auto;
@@ -1905,13 +2367,25 @@ def render_layout(
                 padding: 8px 0;
             }}
             .brand-logo-img {{
-                height: 30px;
+                height: 38px;
             }}
             .brand-title {{
-                font-size: 1rem;
+                font-size: 1.12rem;
             }}
             .brand-sub {{
                 display: none;
+            }}
+            .seeda-animated-orb {{
+                width: 72px;
+                height: 72px;
+            }}
+            .seeda-orb-img {{
+                width: 56px;
+                height: 56px;
+            }}
+            .seeda-orb-svg {{
+                width: 54px;
+                height: 54px;
             }}
             .nav-actions {{
                 gap: 5px;
@@ -1968,6 +2442,82 @@ def render_layout(
                 flex: 0 0 228px;
                 min-width: 228px;
                 padding: 13px 14px;
+            }}
+            .stores-grid {{
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }}
+            .categories-grid {{
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }}
+            .products-grid {{
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }}
+            .deal-card {{
+                border-radius: 15px;
+            }}
+            .deal-thumb {{
+                height: 142px;
+                padding: 8px;
+            }}
+            .badges-top-right {{
+                top: 6px;
+                right: 6px;
+                gap: 3px;
+            }}
+            .badge-disc, .badge-promo, .badge-real {{
+                font-size: 0.64rem;
+                padding: 2px 6px;
+                border-radius: 6px;
+            }}
+            .badge-store {{
+                bottom: 6px;
+                left: 6px;
+                font-size: 0.62rem;
+                padding: 2px 7px;
+            }}
+            .deal-body {{
+                padding: 9px;
+                gap: 6px;
+            }}
+            .deal-cat {{
+                font-size: 0.66rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }}
+            .deal-title {{
+                font-size: 0.8rem;
+                line-height: 1.35;
+                min-height: 2.15em;
+            }}
+            .price-now {{
+                font-size: 0.96rem;
+            }}
+            .price-old {{
+                font-size: 0.72rem;
+            }}
+            .history-mini {{
+                flex-direction: column;
+                gap: 2px;
+                font-size: 0.65rem;
+                padding: 5px 7px;
+            }}
+            .card-actions {{
+                grid-template-columns: 1fr auto auto;
+                gap: 4px;
+            }}
+            .btn-buy {{
+                padding: 6px 6px;
+                font-size: 0.7rem;
+                border-radius: 8px;
+            }}
+            .btn-hist {{
+                padding: 6px 6px;
+                font-size: 0.68rem;
+                border-radius: 8px;
             }}
             .footer-grid {{
                 grid-template-columns: 1fr;
@@ -2054,12 +2604,19 @@ def render_layout(
                     <h4>المتاجر اللي نراقبها</h4>
                     <ul>
                         <li><a href="/deals?store=noon_bh">🟡 نون البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=namshi_bh">🖤 نمشي البحرين (شغال)</a></li>
                         <li><a href="/deals?store=extra_bh">🔵 إكسترا البحرين (شغال)</a></li>
                         <li><a href="/deals?store=microless_bh">🟠 ميكروليس البحرين (شغال)</a></li>
                         <li><a href="/deals?store=alershad_bh">🟤 الإرشاد البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=alnasser_bh">🔴 النصر البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=randb_bh">🖤 آر أند بي البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=max_bh">🔴 ماكس البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=splash_bh">🔴 سبلاش البحرين (شغال)</a></li>
                         <li><a href="/deals?store=ramez_bh">🔴 رامز البحرين (شغال)</a></li>
                         <li><a href="/deals?store=hypermax_bh">🔴 هايبرماكس البحرين (شغال)</a></li>
                         <li><a href="/deals?store=ansar_bh">🩷 أنصار جاليري البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=baraka_bh">🟩 البركة للرياضة البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=albayan_bh">🌹 البيان البحرين (شغال)</a></li>
                         <li><a href="/deals?store=zain_bh">🟣 زين البحرين (شغال)</a></li>
                         <li><a href="/deals?store=stc_bh">🟪 stc البحرين (شغال)</a></li>
                         <li><a href="/deals?store=batelco_bh">🔴 باتلكو البحرين (شغال)</a></li>
@@ -2069,6 +2626,16 @@ def render_layout(
                         <li><a href="/deals?store=ourshopee_bh">🟪 أور شوبي البحرين (شغال)</a></li>
                         <li><a href="/deals?store=advancedpc_bh">🟦 أدفانسد بي سي البحرين (شغال)</a></li>
                         <li><a href="/deals?store=lulu_bh">🟩 لولو هايبرماركت البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=ishop_bh">🛍️ آي شوب البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=aivi_bh">🛍️ أيفي البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=soko_bh">🛍️ سوكو البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=talabat_mart_bh">🧡 طلبات مارت البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=flormar_bh">💄 فلورمار البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=ninja_bh">🥷 نينجا البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=asq_bh">🕌 عبد الصمد القرشي البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=almajed4oud_bh">🪵 الماجد للعود البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=bbw_bh">🛁 باث آند بودي وركس البحرين (شغال)</a></li>
+                        <li><a href="/deals?store=miniso_bh">🧸 مينيسو البحرين (شغال)</a></li>
                     </ul>
                 </div>
 
@@ -2086,7 +2653,7 @@ def render_layout(
                 <div class="footer-col">
                     <h4>🛡️ تنويه مهم</h4>
                     <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
-                        الأسعار وتوفر المنتجات يتحدثون باستمرار، والسعر النهائي هو اللي يطلعلك في صفحة المتجر وقت الدفع. بعض الروابط قد تكون روابط عمولة بدون أي زيادة عليك.
+                        الأسعار وتوفر المنتجات يتحدثون باستمرار، والسعر النهائي هو اللي يطلعلك في صفحة المتجر وقت الدفع. بعض الروابط ممكن تكون روابط عمولة بدون أي زيادة عليك.
                     </p>
                 </div>
             </div>
@@ -2126,12 +2693,19 @@ def render_layout(
 
         const STORE_VISUALS = {{
             noon_bh: {{ label: 'نون البحرين', badge: 'noon', logo: '/static/noon_bh.png', bg: '#FACC15', fg: '#111827', border: 'rgba(250, 204, 21, 0.55)' }},
+            namshi_bh: {{ label: 'نمشي البحرين', badge: 'Namshi', logo: '/static/namshi_bh.png', bg: '#111827', fg: '#FFFFFF', border: 'rgba(148, 163, 184, 0.55)' }},
             extra_bh: {{ label: 'إكسترا البحرين', badge: 'eXtra', logo: '/static/extra_bh.png', bg: '#1D4ED8', fg: '#FFFFFF', border: 'rgba(59, 130, 246, 0.55)' }},
             microless_bh: {{ label: 'ميكروليس البحرين', badge: 'Microless', logo: '/static/microless_bh.png', bg: '#EA580C', fg: '#FFFFFF', border: 'rgba(249, 115, 22, 0.55)' }},
             alershad_bh: {{ label: 'الإرشاد البحرين', badge: 'AlErshad', logo: '/static/alershad_bh.png', bg: '#92400E', fg: '#FFFFFF', border: 'rgba(180, 83, 9, 0.55)' }},
+            alnasser_bh: {{ label: 'النصر البحرين', badge: 'AlNasser', logo: '/static/alnasser_bh.png', bg: '#B91C1C', fg: '#FFFFFF', border: 'rgba(220, 38, 38, 0.55)' }},
+            randb_bh: {{ label: 'آر أند بي البحرين', badge: 'R&B', logo: '/static/randb_bh.png', bg: '#111827', fg: '#FFFFFF', border: 'rgba(148, 163, 184, 0.55)' }},
+            max_bh: {{ label: 'ماكس البحرين', badge: 'MAX', logo: '/static/max_bh.png', bg: '#DC2626', fg: '#FFFFFF', border: 'rgba(239, 68, 68, 0.55)' }},
+            splash_bh: {{ label: 'سبلاش البحرين', badge: 'Splash', logo: '/static/splash_bh.png', bg: '#E11D48', fg: '#FFFFFF', border: 'rgba(244, 63, 94, 0.55)' }},
             ramez_bh: {{ label: 'رامز البحرين', badge: 'Ramez', logo: '/static/ramez_bh.png', bg: '#B91C1C', fg: '#FFFFFF', border: 'rgba(220, 38, 38, 0.55)' }},
             hypermax_bh: {{ label: 'هايبرماكس البحرين', badge: 'HyperMax', logo: '/static/hypermax_bh.png', bg: '#DC2626', fg: '#FFFFFF', border: 'rgba(239, 68, 68, 0.55)' }},
             ansar_bh: {{ label: 'أنصار جاليري البحرين', badge: 'Ansar', logo: '/static/ansar_bh.png', bg: '#DB2777', fg: '#FFFFFF', border: 'rgba(236, 72, 153, 0.55)' }},
+            baraka_bh: {{ label: 'البركة للرياضة البحرين', badge: 'Baraka', logo: '/static/albaraka_bh.png', bg: '#0F766E', fg: '#FFFFFF', border: 'rgba(15, 118, 110, 0.55)' }},
+            albayan_bh: {{ label: 'البيان البحرين', badge: 'AlBayan', logo: '/static/Albayan_bh.png', bg: '#991B1B', fg: '#FFFFFF', border: 'rgba(185, 28, 28, 0.55)' }},
             zain_bh: {{ label: 'زين البحرين', badge: 'zain', logo: '/static/zain_bh.png', bg: '#7E22CE', fg: '#FFFFFF', border: 'rgba(168, 85, 247, 0.55)' }},
             stc_bh: {{ label: 'stc البحرين', badge: 'stc', logo: '/static/stc_bh.png', bg: '#4F008C', fg: '#FFFFFF', border: 'rgba(192, 38, 211, 0.55)' }},
             batelco_bh: {{ label: 'باتلكو البحرين', badge: 'Batelco', logo: '/static/batelco_bh.png', bg: '#E11D48', fg: '#FFFFFF', border: 'rgba(225, 29, 72, 0.55)' }},
@@ -2141,7 +2715,17 @@ def render_layout(
             sharaf_bh: {{ label: 'شرف DG البحرين', badge: 'SDG', logo: '/static/sharafdg_bh.png', bg: '#D97706', fg: '#FFFFFF', border: 'rgba(245, 158, 11, 0.55)' }},
             ourshopee_bh: {{ label: 'أور شوبي البحرين', badge: 'OurShopee', logo: '/static/ourshopee_bh.png', bg: '#6D28D9', fg: '#FFFFFF', border: 'rgba(124, 58, 237, 0.55)' }},
             advancedpc_bh: {{ label: 'أدفانسد بي سي البحرين', badge: 'AdvPC', logo: '/static/advancedpc_bh.png', bg: '#1E40AF', fg: '#FFFFFF', border: 'rgba(37, 99, 235, 0.55)' }},
-            lulu_bh: {{ label: 'لولو هايبرماركت البحرين', badge: 'LuLu', logo: '/static/lulu_bh.png', bg: '#15803D', fg: '#FFFFFF', border: 'rgba(22, 163, 74, 0.55)' }}
+            lulu_bh: {{ label: 'لولو هايبرماركت البحرين', badge: 'LuLu', logo: '/static/lulu_bh.png', bg: '#15803D', fg: '#FFFFFF', border: 'rgba(22, 163, 74, 0.55)' }},
+            ishop_bh: {{ label: 'آي شوب البحرين', badge: 'iShop', logo: '/static/ishop_bh.png', bg: '#0F172A', fg: '#FFFFFF', border: 'rgba(56, 189, 248, 0.55)' }},
+            aivi_bh: {{ label: 'أيفي البحرين', badge: 'AIVI', logo: '/static/aivi_bh.png', bg: '#111827', fg: '#FFFFFF', border: 'rgba(255, 42, 68, 0.55)' }},
+            soko_bh: {{ label: 'سوكو البحرين', badge: 'SOKO', logo: '/static/soko_bh.png', bg: '#2563EB', fg: '#FFFFFF', border: 'rgba(56, 189, 248, 0.55)' }},
+            talabat_mart_bh: {{ label: 'طلبات مارت البحرين', badge: 'Mart', logo: '/static/talabat_mart_bh.png', bg: '#FF5A00', fg: '#FFFFFF', border: 'rgba(255, 90, 0, 0.55)' }},
+            flormar_bh: {{ label: 'فلورمار البحرين', badge: 'Flormar', logo: '/static/flormar_bh.png', bg: '#E11D48', fg: '#FFFFFF', border: 'rgba(225, 29, 72, 0.55)' }},
+            ninja_bh: {{ label: 'نينجا البحرين', badge: 'Ninja', logo: '/static/ninja_bh.png', bg: '#7C3AED', fg: '#FFFFFF', border: 'rgba(124, 58, 237, 0.55)' }},
+            asq_bh: {{ label: 'عبد الصمد القرشي البحرين', badge: 'ASQ', logo: '/static/asq_bh.png', bg: '#78350F', fg: '#FFFFFF', border: 'rgba(217, 119, 6, 0.55)' }},
+            almajed4oud_bh: {{ label: 'الماجد للعود البحرين', badge: 'Almajed', logo: '/static/almajed4oud_bh.png', bg: '#7C2D12', fg: '#FFFFFF', border: 'rgba(180, 83, 9, 0.55)' }},
+            bbw_bh: {{ label: 'باث آند بودي وركس البحرين', badge: 'BBW', logo: '/static/bbw_bh.png', bg: '#1D4ED8', fg: '#FFFFFF', border: 'rgba(59, 130, 246, 0.55)' }},
+            miniso_bh: {{ label: 'مينيسو البحرين', badge: 'MINISO', logo: '/static/miniso_bh.png', bg: '#E11D2E', fg: '#FFFFFF', border: 'rgba(225, 29, 46, 0.55)' }}
         }};
 
         function getStoreLabel(storeKey) {{
@@ -2229,16 +2813,32 @@ def render_layout(
                 storeKey === 'extra_bh' ||
                 storeKey === 'microless_bh' ||
                 storeKey === 'alershad_bh' ||
+                storeKey === 'alnasser_bh' ||
+                storeKey === 'randb_bh' ||
+                storeKey === 'max_bh' ||
+                storeKey === 'splash_bh' ||
                 storeKey === 'ramez_bh' ||
                 storeKey === 'hypermax_bh' ||
                 storeKey === 'ansar_bh' ||
+                storeKey === 'baraka_bh' ||
+                storeKey === 'albayan_bh' ||
                 storeKey === 'zain_bh' ||
                 storeKey === 'stc_bh' ||
                 storeKey === 'batelco_bh' ||
                 storeKey === 'sharafdg_bh' ||
                 storeKey === 'sharaf_bh' ||
                 storeKey === 'advancedpc_bh' ||
-                storeKey === 'lulu_bh'
+                storeKey === 'lulu_bh' ||
+                storeKey === 'ishop_bh' ||
+                storeKey === 'aivi_bh' ||
+                storeKey === 'soko_bh' ||
+                storeKey === 'talabat_mart_bh' ||
+                storeKey === 'flormar_bh' ||
+                storeKey === 'ninja_bh' ||
+                storeKey === 'asq_bh' ||
+                storeKey === 'almajed4oud_bh' ||
+                storeKey === 'bbw_bh' ||
+                storeKey === 'miniso_bh'
             ) ? 3 : 2;
         }}
 
@@ -2304,6 +2904,30 @@ def render_layout(
             }}
         }}
 
+        function extractPromoFromTitle(rawName) {{
+            const name = String(rawName || '').trim();
+            const splitMatch = name.match(/^(.*?)\\s*\\|\\s*🎁\\s*(.+)$/);
+            if (splitMatch) {{
+                return {{ cleanTitle: splitMatch[1].trim(), promoText: splitMatch[2].trim() }};
+            }}
+            const inlinePatterns = [
+                /(\\d+\\s*\\+\\s*\\d+\\s*مجان[اًا]?)/i,
+                /(\\d+\\s*\\+\\s*\\d+\\s*free)/i,
+                /(اختر\\s*أي\\s*\\d+[^|،]{{2,32}})/i,
+                /(اشترِ?\\s*\\d+[^|،]{{2,32}})/i,
+                /(هدية\\s*مجان[اًا]?[^|،]{{0,22}})/i,
+                /(كاش\\s*باك[^|،]{{0,22}})/i,
+                /(شحن\\s*مجان[اًا]?[^|،]{{0,18}})/i
+            ];
+            for (const pat of inlinePatterns) {{
+                const m = name.match(pat);
+                if (m) {{
+                    return {{ cleanTitle: name, promoText: m[1].trim() }};
+                }}
+            }}
+            return {{ cleanTitle: name, promoText: '' }};
+        }}
+
         function renderProductCard(p) {{
             const storeKey = p.store || (String(p.sku || '').startsWith('ANSAR_') ? 'ansar_bh' : 'noon_bh');
             const storeLabel = getStoreLabel(storeKey);
@@ -2314,9 +2938,13 @@ def render_layout(
             const avgStr = fmtPrice(p.avg_price, storeKey);
             const unitSuffix = 'د.ب';
 
+            const parsedTitle = extractPromoFromTitle(p.name || '');
+            const displayName = parsedTitle.cleanTitle || (p.name || '');
+            const promoOffer = String(p.promo_offer || parsedTitle.promoText || '').trim();
+
             const rawImg = String(p.image_url || '').trim();
             const isLocalImg = rawImg.startsWith('/static/') && !isBannedBannerUrl(rawImg);
-            const isHttpImg = /^https?:\/\//i.test(rawImg) && !isBannedBannerUrl(rawImg);
+            const isHttpImg = /^https?:\\/\\//i.test(rawImg) && !isBannedBannerUrl(rawImg);
 
             const localSrc = isLocalImg ? rawImg : '';
             const originImg = isHttpImg ? rawImg : '';
@@ -2324,11 +2952,12 @@ def render_layout(
 
             const primaryImg = (storeKey === 'microless_bh')
                 ? (localSrc || storeLogo || proxyImg || originImg || '/favicon.svg')
-                : (localSrc || proxyImg || originImg || storeLogo || '/favicon.svg');
+                : (proxyImg || originImg || localSrc || storeLogo || '/favicon.svg');
             const initialStep = localSrc ? '0' : (proxyImg ? '1' : (originImg ? '2' : (storeLogo ? '3' : '4')));
 
             const oldHtml = oldStr ? `<span class="price-old">${{oldStr}} ${{unitSuffix}}</span>` : '';
             const discHtml = p.discount_pct > 0 ? `<span class="badge-disc">-${{Math.round(p.discount_pct)}}%</span>` : '';
+            const promoHtml = promoOffer ? `<span class="badge-promo">🎁 ${{escapeHtml(promoOffer)}}</span>` : '';
             const realHtml = p.is_real_deal ? `<span class="badge-real">🔥 خوش صيدة</span>` : (p.is_lowest_now ? `<span class="badge-real">📉 أرخص سعر</span>` : '');
             const isSaved = !!p.is_saved;
             const savePayload = JSON.stringify({{
@@ -2340,13 +2969,13 @@ def render_layout(
             return `
                 <article class="deal-card">
                     <div class="deal-thumb">
-                        <div class="badges-top-right">${{discHtml}}${{realHtml}}</div>
+                        <div class="badges-top-right">${{discHtml}}${{promoHtml}}${{realHtml}}</div>
                         <span class="badge-store">${{escapeHtml(storeLabel)}}</span>
-                        <img src="${{escapeHtml(primaryImg)}}" data-proxy="${{escapeHtml(proxyImg)}}" data-origin="${{escapeHtml(originImg)}}" data-store-logo="${{escapeHtml(storeLogo)}}" data-img-step="${{initialStep}}" alt="${{escapeHtml(p.name)}}" loading="lazy" onerror="handleProductImageError(this)" />
+                        <img src="${{escapeHtml(primaryImg)}}" data-proxy="${{escapeHtml(proxyImg)}}" data-origin="${{escapeHtml(originImg)}}" data-store-logo="${{escapeHtml(storeLogo)}}" data-img-step="${{initialStep}}" alt="${{escapeHtml(displayName)}}" loading="lazy" onerror="handleProductImageError(this)" />
                     </div>
                     <div class="deal-body">
                         <div class="deal-cat">${{escapeHtml(p.category || 'عام')}} • ${{escapeHtml(p.updated_ago || '')}}</div>
-                        <h3 class="deal-title" title="${{escapeHtml(p.name)}}">${{escapeHtml(p.name)}}</h3>
+                        <h3 class="deal-title" title="${{escapeHtml(p.name)}}">${{escapeHtml(displayName)}}</h3>
                         <div class="price-row">
                             <span class="price-now">${{currStr}} BHD</span>
                             ${{oldHtml}}
@@ -2357,7 +2986,7 @@ def render_layout(
                         </div>
                         <div class="card-actions">
                             <a href="${{escapeHtml(p.affiliate_url)}}" target="_blank" rel="noopener" class="btn-buy">روح للعرض ↗</a>
-                            <button type="button" class="btn-hist btn-save ${{isSaved ? 'saved' : ''}}" onclick='toggleSaveDeal(this, ${{savePayload}})' title="احفظ في المفضلة">${{isSaved ? '⭐ محفوظ' : '☆ احفظه'}}</button>
+                            <button type="button" class="btn-hist btn-save ${{isSaved ? 'saved' : ''}}" onclick='toggleSaveDeal(this, ${{savePayload}})' title="احفظه في المفضلة">${{isSaved ? '⭐ محفوظ' : '☆ احفظه'}}</button>
                             <button type="button" class="btn-hist" onclick="openHistoryModal('${{escapeHtml(p.sku)}}')" title="چوف تاريخ السعر">📊</button>
                         </div>
                     </div>
@@ -2433,11 +3062,33 @@ def render_layout(
 @app.get("/", response_class=HTMLResponse)
 def page_home(request: Request):
     user = get_current_user(request)
+    has_custom_logo = (BASE_DIR / "logo.png").exists()
+    orb_logo_html = (
+        '<img src="/logo.png" alt="صيدة" class="seeda-orb-img" />'
+        if has_custom_logo
+        else r"""
+        <svg viewBox="0 0 64 64" class="seeda-orb-svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="homeOrbGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#FF2A44"/>
+                    <stop offset="100%" stop-color="#F59E0B"/>
+                </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="28" fill="url(#homeOrbGrad)"/>
+            <circle cx="32" cy="32" r="18" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="6 4"/>
+            <circle cx="32" cy="32" r="7" fill="#FFFFFF"/>
+            <circle cx="32" cy="32" r="3" fill="#CE1126"/>
+        </svg>
+        """
+    )
+
     store_order = [
-        "noon_bh", "extra_bh", "microless_bh", "alershad_bh",
-        "ramez_bh", "hypermax_bh", "ansar_bh", "zain_bh",
-        "stc_bh", "batelco_bh", "virgin_bh", "jarir_bh",
-        "sharafdg_bh", "ourshopee_bh", "advancedpc_bh", "lulu_bh"
+        "noon_bh", "namshi_bh", "extra_bh", "microless_bh", "alershad_bh",
+        "alnasser_bh", "randb_bh", "max_bh", "splash_bh", "ramez_bh", "hypermax_bh", "ansar_bh",
+        "baraka_bh", "albayan_bh", "zain_bh", "stc_bh", "batelco_bh",
+        "virgin_bh", "jarir_bh", "sharafdg_bh", "ourshopee_bh",
+        "advancedpc_bh", "lulu_bh", "ishop_bh", "aivi_bh", "soko_bh", "talabat_mart_bh",
+        "flormar_bh", "ninja_bh", "asq_bh", "almajed4oud_bh", "bbw_bh", "miniso_bh"
     ]
     store_cards_parts = []
     for k in store_order:
@@ -2464,7 +3115,7 @@ def page_home(request: Request):
             <div class="hero-badge"><span class="live-dot"></span> صيدة البحرين • متابعة فورية للأسعار</div>
             <h1 class="hero-title">أقوى صيدات البحرين... <span>أول ما تنزل 🎯</span></h1>
             <p class="hero-desc">
-                نراقب الأسعار بالدينار البحريني (BHD / د.ب) في متاجر البحرين ونوريك تاريخ السعر عشان تعرف إذا الخصم صج يسوى ولا بس كلام.
+                نراقب الأسعار بالدينار البحريني (BHD / د.ب) في متاجر البحرين ونوريك تاريخ السعر عشان تعرف إذا الخصم صج يسوى ولا بس حجي.
             </p>
             <div class="hero-cta-group">
                 <a href="/deals?real_only=1" class="btn-primary">🔥 چوف الصيدات الحقيقية</a>
@@ -2481,9 +3132,18 @@ def page_home(request: Request):
         </div>
 
         <div class="hero-showcase">
+            <div class="showcase-orb-banner">
+                <div class="showcase-orb-info">
+                    <span class="tag-pill">شغال 24/7</span>
+                    <div style="font-weight:900; font-size:1rem; line-height:1.35;">رادار صيدة الذكي 🎯</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary);">اضغط على اللوجو ودش على الصيدات الصجية</div>
+                </div>
+                <a href="/deals?real_only=1" class="seeda-animated-orb" title="لوجو صيدة المتحرك — چوف الصيدات">
+                    {orb_logo_html}
+                </a>
+            </div>
             <div class="showcase-top">
                 <span style="font-weight:800; font-size:0.95rem;">📊 شلون نعرف الصيدة الصجية؟</span>
-                <span class="tag-pill">شغال 24/7</span>
             </div>
             <div class="showcase-row">
                 <div>
@@ -2513,12 +3173,12 @@ def page_home(request: Request):
         <div class="sec-head">
             <div>
                 <h2 class="sec-title">🏬 المتاجر في البحرين</h2>
-                <div class="sec-sub">اسحب يمين ويسار في الشريط أو اضغط على أي متجر أو افتح صفحة كل المتاجر</div>
+                <div class="sec-sub">اسحب يمين ويسار في الشريط أو دوس على أي متجر أو افتح صفحة كل المتاجر</div>
             </div>
             <div class="sec-head-actions">
                 <div class="strip-controls">
-                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', 1)" aria-label="التالي">→</button>
-                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', -1)" aria-label="السابق">←</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', 1)" aria-label="اللي عقبه">→</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeStoresStrip', -1)" aria-label="اللي قبله">←</button>
                 </div>
                 <a href="/stores" class="btn-outline">كل المتاجر ←</a>
             </div>
@@ -2532,12 +3192,12 @@ def page_home(request: Request):
         <div class="sec-head">
             <div>
                 <h2 class="sec-title">📂 الأقسام</h2>
-                <div class="sec-sub">قلّب في شريط الأقسام وافتح القسم اللي تبيه بنقرة واحدة</div>
+                <div class="sec-sub">قلّب في شريط الأقسام وافتح القسم اللي تبيه بضغطة وحدة</div>
             </div>
             <div class="sec-head-actions">
                 <div class="strip-controls">
-                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', 1)" aria-label="التالي">→</button>
-                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', -1)" aria-label="السابق">←</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', 1)" aria-label="اللي عقبه">→</button>
+                    <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('homeCatsGrid', -1)" aria-label="اللي قبله">←</button>
                 </div>
                 <a href="/categories" class="btn-outline">كل الأقسام ←</a>
             </div>
@@ -2549,7 +3209,7 @@ def page_home(request: Request):
         <div class="sec-head">
             <div>
                 <h2 class="sec-title"><span class="live-dot"></span> صيدات نازلة الحين</h2>
-                <div class="sec-sub">أحدث المنتجات اللي نزلت أسعارها أو عليها خصم يسوى</div>
+                <div class="sec-sub">أجدد المنتجات اللي نزلت أسعارها أو عليها خصم يسوى</div>
             </div>
             <a href="/deals" class="btn-primary">چوف الكل ←</a>
         </div>
@@ -2636,12 +3296,19 @@ def page_deals(request: Request):
         <select id="filterStore">
             <option value="">كل المتاجر</option>
             <option value="noon_bh">نون البحرين</option>
+            <option value="namshi_bh">نمشي البحرين</option>
             <option value="extra_bh">إكسترا البحرين</option>
             <option value="microless_bh">ميكروليس البحرين</option>
             <option value="alershad_bh">الإرشاد البحرين</option>
+            <option value="alnasser_bh">النصر البحرين</option>
+            <option value="randb_bh">آر أند بي البحرين</option>
+            <option value="max_bh">ماكس البحرين</option>
+            <option value="splash_bh">سبلاش البحرين</option>
             <option value="ramez_bh">رامز البحرين</option>
             <option value="hypermax_bh">هايبرماكس البحرين</option>
             <option value="ansar_bh">أنصار جاليري البحرين</option>
+            <option value="baraka_bh">البركة للرياضة البحرين</option>
+            <option value="albayan_bh">البيان البحرين</option>
             <option value="zain_bh">زين البحرين</option>
             <option value="stc_bh">stc البحرين</option>
             <option value="batelco_bh">باتلكو البحرين</option>
@@ -2651,12 +3318,22 @@ def page_deals(request: Request):
             <option value="ourshopee_bh">أور شوبي البحرين</option>
             <option value="advancedpc_bh">أدفانسد بي سي البحرين</option>
             <option value="lulu_bh">لولو هايبرماركت البحرين</option>
+            <option value="ishop_bh">آي شوب البحرين</option>
+            <option value="aivi_bh">أيفي البحرين</option>
+            <option value="soko_bh">سوكو البحرين</option>
+            <option value="talabat_mart_bh">طلبات مارت البحرين</option>
+            <option value="flormar_bh">فلورمار البحرين</option>
+            <option value="ninja_bh">نينجا البحرين</option>
+            <option value="asq_bh">عبد الصمد القرشي البحرين</option>
+            <option value="almajed4oud_bh">الماجد للعود البحرين</option>
+            <option value="bbw_bh">باث آند بودي وركس البحرين</option>
+            <option value="miniso_bh">مينيسو البحرين</option>
         </select>
         <select id="filterCat">
             <option value="">كل الأقسام</option>
         </select>
         <select id="filterSort">
-            <option value="recent">الأحدث نزولاً</option>
+            <option value="recent">الأجدد نزولاً</option>
             <option value="real">خوش صيدات أولاً</option>
             <option value="discount">أعلى خصم</option>
             <option value="price_asc">السعر: من الأرخص للأغلى</option>
@@ -2675,6 +3352,7 @@ def page_deals(request: Request):
         const urlParams = new URLSearchParams(window.location.search);
         let realOnly = urlParams.get('real_only') === '1' ? 1 : 0;
         let currentPage = 1;
+        let preferredCat = urlParams.get('category') || '';
 
         document.getElementById('filterQ').value = urlParams.get('q') || '';
         document.getElementById('filterStore').value = urlParams.get('store') || '';
@@ -2687,7 +3365,9 @@ def page_deals(request: Request):
             applyFilters(1);
         });
 
-        document.getElementById('filterStore').addEventListener('change', function() {
+        document.getElementById('filterStore').addEventListener('change', async function() {
+            preferredCat = '';
+            await initCategoriesFilter(this.value);
             applyFilters(1);
         });
 
@@ -2710,18 +3390,27 @@ def page_deals(request: Request):
             }
         });
 
-        async function initCategoriesFilter() {
-            const res = await fetch('/api/summary');
+        async function initCategoriesFilter(storeVal = '') {
+            const qs = storeVal ? ('?store=' + encodeURIComponent(storeVal)) : '';
+            const res = await fetch('/api/summary' + qs);
             const data = await res.json();
             const sel = document.getElementById('filterCat');
-            const targetCat = urlParams.get('category') || '';
+            sel.innerHTML = '<option value="">كل الأقسام</option>';
+            let matched = false;
             data.categories.forEach(c => {
+                if (!c.name) return;
                 const opt = document.createElement('option');
                 opt.value = c.name;
                 opt.textContent = `${c.name} (${c.count})`;
-                if (c.name === targetCat) opt.selected = true;
+                if (preferredCat && c.name === preferredCat) {
+                    opt.selected = true;
+                    matched = true;
+                }
                 sel.appendChild(opt);
             });
+            if (!matched) {
+                sel.value = '';
+            }
         }
 
         async function applyFilters(page = 1) {
@@ -2753,12 +3442,13 @@ def page_deals(request: Request):
                 }
                 pag.innerHTML += `<span style="padding:8px 14px; font-weight:700;">صفحة ${page} من ${data.pages}</span>`;
                 if (page < data.pages) {
-                    pag.innerHTML += `<button class="btn-outline" onclick="applyFilters(${page + 1})">اللي بعدها</button>`;
+                    pag.innerHTML += `<button class="btn-outline" onclick="applyFilters(${page + 1})">اللي عقبه</button>`;
                 }
             }
         }
 
-        initCategoriesFilter().then(() => applyFilters(1));
+        const initialStore = document.getElementById('filterStore').value;
+        initCategoriesFilter(initialStore).then(() => applyFilters(1));
     </script>
     """
     return render_layout("العروض الحين", "deals", body, script, user=user)
@@ -2771,21 +3461,36 @@ def page_categories(request: Request):
     <div class="sec-head">
         <div>
             <h1 class="sec-title">📂 الأقسام</h1>
-            <div class="sec-sub">اسحب يمين ويسار في شريط الأقسام أو اختر القسم مباشرة</div>
+            <div class="sec-sub">تصفح كل الأقسام بترتيب مريح أو دوّر باسم القسم على طول</div>
         </div>
-        <div class="strip-controls">
-            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allCatsGrid', 1)" aria-label="التالي">→</button>
-            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allCatsGrid', -1)" aria-label="السابق">←</button>
-        </div>
+        <div id="catsCountBadge" class="tag-pill">قاعدين نحمّل...</div>
     </div>
-    <div class="cats-strip" id="allCatsGrid"></div>
+
+    <div class="directory-search-box">
+        <span style="font-size:1.15rem;" aria-hidden="true">🔍</span>
+        <input type="text" id="categorySearchInput" placeholder="اكتب اسم القسم عشان تلاقيه بسرعة..." autocomplete="off" autofocus />
+    </div>
+
+    <div class="categories-grid" id="allCatsGrid"></div>
     """
     script = """
     <script>
-        enableDragScroll('allCatsGrid');
-        fetch('/api/summary').then(r => r.json()).then(data => {
+        let allCategoriesData = [];
+
+        function renderFilteredCategories(queryText = '') {
+            const q = String(queryText || '').trim().toLowerCase();
             const grid = document.getElementById('allCatsGrid');
-            grid.innerHTML = data.categories.map(c => `
+            const badge = document.getElementById('catsCountBadge');
+            const filtered = q
+                ? allCategoriesData.filter(c => String(c.name || '').toLowerCase().includes(q))
+                : allCategoriesData;
+
+            badge.textContent = `${filtered.length} قسم`;
+            if (!filtered.length) {
+                grid.innerHTML = '<p style="color:var(--text-secondary); grid-column:1/-1;">ما لقينا قسم يطابق بحثك.</p>';
+                return;
+            }
+            grid.innerHTML = filtered.map(c => `
                 <a href="/deals?category=${encodeURIComponent(c.name)}" class="cat-card">
                     <div style="display:flex; align-items:center; gap:14px; min-width:0;">
                         <div class="cat-badge-icon">🎯</div>
@@ -2797,6 +3502,15 @@ def page_categories(request: Request):
                     <span class="cat-arrow">←</span>
                 </a>
             `).join('');
+        }
+
+        document.getElementById('categorySearchInput').addEventListener('input', function() {
+            renderFilteredCategories(this.value);
+        });
+
+        fetch('/api/summary').then(r => r.json()).then(data => {
+            allCategoriesData = Array.isArray(data.categories) ? data.categories : [];
+            renderFilteredCategories(document.getElementById('categorySearchInput').value);
         });
     </script>
     """
@@ -2807,16 +3521,19 @@ def page_categories(request: Request):
 def page_stores(request: Request):
     user = get_current_user(request)
     store_order = [
-        "noon_bh", "extra_bh", "microless_bh", "alershad_bh",
-        "ramez_bh", "hypermax_bh", "ansar_bh", "zain_bh",
-        "stc_bh", "batelco_bh", "virgin_bh", "jarir_bh",
-        "sharafdg_bh", "ourshopee_bh", "advancedpc_bh", "lulu_bh"
+        "noon_bh", "namshi_bh", "extra_bh", "microless_bh", "alershad_bh",
+        "alnasser_bh", "randb_bh", "max_bh", "splash_bh", "ramez_bh", "hypermax_bh", "ansar_bh",
+        "baraka_bh", "albayan_bh", "zain_bh", "stc_bh", "batelco_bh",
+        "virgin_bh", "jarir_bh", "sharafdg_bh", "ourshopee_bh",
+        "advancedpc_bh", "lulu_bh", "ishop_bh", "aivi_bh", "soko_bh", "talabat_mart_bh",
+        "flormar_bh", "ninja_bh", "asq_bh", "almajed4oud_bh", "bbw_bh", "miniso_bh"
     ]
     cards = []
     for k in store_order:
         meta = STORE_META[k]
+        search_terms = html.escape(f"{meta['label']} {meta['badge']} {k}".lower())
         cards.append(f"""
-            <a href="/deals?store={k}" class="store-card" style="border-color: rgba(255, 255, 255, 0.14);">
+            <a href="/deals?store={k}" class="store-card" data-store-search="{search_terms}" style="border-color: rgba(255, 255, 255, 0.14);">
                 <div class="store-icon-box">
                     <img src="{meta['logo']}" alt="{html.escape(meta['badge'])}" class="store-logo-img"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
@@ -2831,20 +3548,40 @@ def page_stores(request: Request):
     <div class="sec-head">
         <div>
             <h1 class="sec-title">🏬 المتاجر في البحرين 🇧🇭</h1>
-            <div class="sec-sub">قلّب في الشريط أو اضغط على المتجر لمشاهدة عروضه وتاريخ أسعاره</div>
+            <div class="sec-sub">كل المتاجر مرتبة في صفوف أو دوّر باسم المتجر على طول</div>
         </div>
-        <div class="strip-controls">
-            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allStoresStrip', 1)" aria-label="التالي">→</button>
-            <button type="button" class="strip-arrow" onclick="scrollHorizontalStrip('allStoresStrip', -1)" aria-label="السابق">←</button>
-        </div>
+        <div id="storesCountBadge" class="tag-pill">{len(store_order)} متجر</div>
     </div>
-    <div class="stores-strip" id="allStoresStrip">
+
+    <div class="directory-search-box">
+        <span style="font-size:1.15rem;" aria-hidden="true">🔍</span>
+        <input type="text" id="storeSearchInput" placeholder="اكتب اسم المتجر عشان تلاقيه بسرعة (نون، نمشي، إكسترا، طلبات...)" autocomplete="off" autofocus />
+    </div>
+
+    <div class="stores-grid" id="allStoresGrid">
         {"".join(cards)}
     </div>
     """
     script = """
     <script>
-        enableDragScroll('allStoresStrip');
+        function filterStoresGrid(queryText = '') {
+            const q = String(queryText || '').trim().toLowerCase();
+            const cards = Array.from(document.querySelectorAll('#allStoresGrid .store-card'));
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const hay = (card.getAttribute('data-store-search') || card.textContent || '').toLowerCase();
+                const match = !q || hay.includes(q);
+                card.style.display = match ? '' : 'none';
+                if (match) visibleCount += 1;
+            });
+            const badge = document.getElementById('storesCountBadge');
+            if (badge) badge.textContent = `${visibleCount} متجر`;
+        }
+
+        document.getElementById('storeSearchInput').addEventListener('input', function() {
+            filterStoresGrid(this.value);
+        });
+
         fetch('/api/summary').then(r => r.json()).then(d => {
             const st = d.stores || {};
             Object.keys(st).forEach(k => {
@@ -2871,13 +3608,13 @@ def page_wishlist(request: Request):
         body = """
         <div class="wishlist-empty">
             <div style="font-size:2.4rem; margin-bottom:10px;">⭐</div>
-            <h1 style="font-size:1.45rem; font-weight:900; margin-bottom:8px;">سجّل دخولك لفتح قائمة المفضلة</h1>
+            <h1 style="font-size:1.45rem; font-weight:900; margin-bottom:8px;">سجّل دخولك عشان تفتح قائمة المفضلة</h1>
             <p style="color:var(--text-secondary); font-size:0.94rem; margin-bottom:20px;">
                 احفظ عروضك المفضلة وتابع أسعارها في البحرين بكل سهولة.
             </p>
             <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                 <a href="/login/google?next=%2Fwishlist" class="btn-primary">دخول سريع بقوقل</a>
-                <a href="/login" class="btn-outline">دخول بالبريد</a>
+                <a href="/login" class="btn-outline">دخول بالإيميل</a>
             </div>
         </div>
         """
@@ -2903,7 +3640,7 @@ def page_wishlist(request: Request):
                 <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
                     احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
                 </p>
-                <a href="/deals" class="btn-primary">🔥 استكشف العروض الحين</a>
+                <a href="/deals" class="btn-primary">🔥 چوف العروض الحين</a>
             </div>
         """
     else:
@@ -2932,7 +3669,7 @@ def page_wishlist(request: Request):
                         <div class="card-actions" style="grid-template-columns: 1fr auto auto;">
                             <a href="{d_url}" target="_blank" rel="noopener" class="btn-buy">روح للعرض ↗</a>
                             <button type="button" class="btn-hist" onclick="openHistoryModal('{d_key}')" title="چوف تاريخ السعر">📊</button>
-                            <button type="button" class="btn-hist btn-save saved" onclick="removeSavedItem(this, '{d_key}')">إزالة</button>
+                            <button type="button" class="btn-hist btn-save saved" onclick="removeSavedItem(this, '{d_key}')">حذف</button>
                         </div>
                     </div>
                 </article>
@@ -2943,14 +3680,14 @@ def page_wishlist(request: Request):
     body = f"""
     <section class="wishlist-banner">
         <div>
-            <div class="hero-badge" style="margin-bottom:8px;">⭐ قائمة المتابعة الخاصة بك</div>
+            <div class="hero-badge" style="margin-bottom:8px;">⭐ قائمة المتابعة مالتك</div>
             <h1 class="sec-title" style="font-size:1.55rem;">عروضي المفضلة {f"— {safe_user_name}" if safe_user_name else ""}</h1>
-            <div class="sec-sub">كل المنتجات اللي حفظتها في مكان واحد منظم لمتابعة السعر والانتقال المباشر للمتجر</div>
+            <div class="sec-sub">كل المنتجات اللي حفظتها في مكان واحد مرتب عشان تتابع السعر وتروح للمتجر على طول</div>
         </div>
         <div class="sec-head-actions">
             <span class="tag-pill" id="wishlistCountPill">{len(saved_items)} منتج محفوظ</span>
-            <a href="/deals" class="btn-primary">⚡ أضف عروض جديدة</a>
-            <a href="/logout" class="btn-outline">تسجيل الخروج</a>
+            <a href="/deals" class="btn-primary">⚡ ضيف عروض يديدة</a>
+            <a href="/logout" class="btn-outline">خروج</a>
         </div>
     </section>
 
@@ -2979,7 +3716,7 @@ def page_wishlist(request: Request):
                             <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:18px;">
                                 احفظ أي عرض يعجبك من صفحة العروض عشان ترجعله بسرعة وتتابع سعره.
                             </p>
-                            <a href="/deals" class="btn-primary">🔥 استكشف العروض الحين</a>
+                            <a href="/deals" class="btn-primary">🔥 چوف العروض الحين</a>
                         </div>
                     `;
                 }
@@ -3014,7 +3751,7 @@ def page_coupons(request: Request):
                     </div>
                     <div>
                         <div style="font-weight:800;">كوبون نون البحرين</div>
-                        <div style="font-size:0.78rem; color:var(--text-secondary);">كود قابل للتحديث</div>
+                        <div style="font-size:0.78rem; color:var(--text-secondary);">كود يتحدث باستمرار</div>
                     </div>
                 </div>
                 <span class="tag-pill">شغال</span>
